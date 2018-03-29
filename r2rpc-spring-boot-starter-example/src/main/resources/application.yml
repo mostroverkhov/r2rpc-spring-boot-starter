@@ -1,0 +1,15 @@
+
+r2rpc:
+ server:
+  defaults:
+    codecs:
+      - jackson
+    transport: tcp
+  endpoints:
+    - name: foo
+      port: 8083
+      api: baz
+
+logging:
+  level:
+    com.github.mostroverkhov.r2: DEBUG

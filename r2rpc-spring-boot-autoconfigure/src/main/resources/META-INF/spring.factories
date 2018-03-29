@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.github.mostroverkhov.r2.autoconfigure.internal.R2ServerAutoConfiguration
