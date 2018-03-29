@@ -25,6 +25,8 @@ r2rpc:
 
 Additional transports can be declared as `@R2ServerTransport` annotated Spring beans, codecs - `@R2DataCodec`.
 
+### Examples
+
 Example module contains simple self-contained runnable application - `R2rpcStarterExampleApplicaton`.
 
 ### LICENSE
