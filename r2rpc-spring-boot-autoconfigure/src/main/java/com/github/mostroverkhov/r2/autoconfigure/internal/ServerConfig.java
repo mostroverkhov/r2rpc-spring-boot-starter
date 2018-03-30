@@ -5,6 +5,7 @@ import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.ServerTransport;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -13,12 +14,12 @@ class ServerConfig {
   private final ServerRSocketFactory rSocketFactory;
   private final ServerTransport<Closeable> transport;
   private final List<DataCodec> codecs;
-  private final Function<ConnectionContext, List<Object>> handlers;
+  private final Function<ConnectionContext, Collection<Object>> handlers;
 
   public ServerConfig(ServerRSocketFactory rSocketFactory,
       ServerTransport<Closeable> transport,
       List<DataCodec> codecs,
-      Function<ConnectionContext, List<Object>> handlers) {
+      Function<ConnectionContext, Collection<Object>> handlers) {
     this.rSocketFactory = rSocketFactory;
     this.transport = transport;
     this.codecs = codecs;
@@ -37,7 +38,7 @@ class ServerConfig {
     return codecs;
   }
 
-  public Function<ConnectionContext, List<Object>> handlers() {
+  public Function<ConnectionContext, Collection<Object>> handlers() {
     return handlers;
   }
 }

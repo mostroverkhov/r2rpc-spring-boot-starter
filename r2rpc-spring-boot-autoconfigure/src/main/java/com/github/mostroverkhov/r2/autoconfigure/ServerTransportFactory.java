@@ -4,7 +4,7 @@ import io.rsocket.Closeable;
 import io.rsocket.transport.ServerTransport;
 import java.util.function.Function;
 
-public interface R2ServerTransportFactory<T extends Closeable> extends
+public interface ServerTransportFactory<T extends Closeable> extends
     Function<Integer, ServerTransport<T>> {
 
 }

@@ -1,8 +1,9 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toSet;
 
-import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.CodecResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlersResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.ServerRSocketFactoryResolver;
@@ -12,7 +13,10 @@ import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.ServerTransport;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import org.springframework.context.ApplicationContext;
@@ -53,7 +57,7 @@ class ServerConfigResolver {
     ServerRSocketFactory rSocketFactory = serverRSocketFactoryResolver.resolve(ctx);
 
     @SuppressWarnings("unchecked")
-    R2ServerTransportFactory<Closeable> transportFactory =
+    ServerTransportFactory<Closeable> transportFactory =
         transportResolver
             .resolve(props.getTransport());
 
@@ -63,8 +67,11 @@ class ServerConfigResolver {
     List<DataCodec> codecs = codecResolver
         .resolve(props.getCodecs());
 
-    Function<ConnectionContext, List<Object>> handlers =
-        handlersResolver.resolve(props.getApi());
+    Set<String> apis = Optional.ofNullable(props.getApi())
+        .map(Collections::singleton)
+        .orElse(emptySet());
+    Function<ConnectionContext, Collection<Object>> handlers =
+        handlersResolver.resolve(apis);
 
     return new ServerConfig(rSocketFactory, transport, codecs, handlers);
   }

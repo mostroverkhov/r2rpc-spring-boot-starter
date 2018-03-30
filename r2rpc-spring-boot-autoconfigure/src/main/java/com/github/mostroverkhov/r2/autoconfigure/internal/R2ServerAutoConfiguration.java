@@ -3,7 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransport;
-import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import io.rsocket.RSocketFactory;
@@ -50,7 +50,7 @@ public class R2ServerAutoConfiguration {
   @Bean
   @ConditionalOnClass(NettyDuplexConnection.class)
   @R2ServerTransport("tcp")
-  public R2ServerTransportFactory<NettyContextCloseable> defaultTransport() {
+  public ServerTransportFactory<NettyContextCloseable> defaultTransport() {
     return TcpServerTransport::create;
   }
 
