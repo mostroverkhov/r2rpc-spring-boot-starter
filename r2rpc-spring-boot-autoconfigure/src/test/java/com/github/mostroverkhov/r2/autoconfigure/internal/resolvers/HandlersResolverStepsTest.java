@@ -3,18 +3,11 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.resolvers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.R2ApiName;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlersResolver.ApiResolveSteps;
 import java.util.Optional;
 import org.junit.Test;
 
 public class HandlersResolverStepsTest {
-
-  @Test
-  public void findNameByR2ApiAndR2ApiName() {
-    Optional<String> apiName = ApiResolveSteps.findApiName(ApiName.class);
-    assertThat(apiName).contains("apiname");
-  }
 
   @Test
   public void findNameByR2Api() {
@@ -28,16 +21,6 @@ public class HandlersResolverStepsTest {
     assertThat(apiName).isEmpty();
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void findNameR2ApiNameOnly() {
-    ApiResolveSteps.findApiName(R2ApiNameOnly.class);
-  }
-
-  @R2ApiName("apiname")
-  interface ApiName extends Api {
-
-  }
-
   @R2Api("api")
   interface Api {
 
@@ -48,11 +31,6 @@ public class HandlersResolverStepsTest {
   }
 
   interface NotR2Api {
-
-  }
-
-  @R2ApiName("apiname")
-  interface R2ApiNameOnly {
 
   }
 }

@@ -8,7 +8,6 @@ import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResol
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.AnotherValidApi;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.AnotherValidApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.Contract;
-import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.DanglingApiNameProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.NoApisProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.RenamedValidApi;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.RenamedValidApiProvider;
@@ -84,13 +83,6 @@ public class HandlerResolverApiResolutionTest {
             new NoApisProvider());
     Collection<Api> apis = handlersResolver.resolveAll();
     assertThat(apis).isEmpty();
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void resolveSingleProviderApiNameOnly() {
-    HandlersResolver handlersResolver = fromProviders(
-            new DanglingApiNameProvider());
-    handlersResolver.resolveAll();
   }
 
   @Test(expected = IllegalArgumentException.class)

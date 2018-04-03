@@ -1,7 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.resolvers;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.R2ApiName;
 import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
 import com.github.mostroverkhov.r2.core.contract.RequestStream;
 import com.github.mostroverkhov.r2.core.contract.Service;
@@ -27,14 +26,6 @@ class HandlerResolverApiResolutionFixtures {
     }
   }
 
-  static class DanglingApiNameProvider implements ServerApiProvider<NonApiImpl> {
-
-    @Override
-    public NonApiImpl apply(ConnectionContext connectionContext) {
-      return new NonApiImpl();
-    }
-  }
-
   static class NoApisProvider implements ServerApiProvider<ArrayList<String>> {
 
     @Override
@@ -47,7 +38,7 @@ class HandlerResolverApiResolutionFixtures {
 
     @Override
     public ValidApiImpl apply(ConnectionContext connectionContext) {
-      return new ValidApiImpl(connectionContext);
+      return new ValidApiImpl();
     }
   }
 
@@ -68,7 +59,7 @@ class HandlerResolverApiResolutionFixtures {
   }
 
 
-  @R2ApiName("named-contract")
+  @R2Api("named-contract")
   static class NamedValidApiImpl implements AnotherValidApi {
 
     public NamedValidApiImpl(ConnectionContext ctx) {
@@ -91,14 +82,7 @@ class HandlerResolverApiResolutionFixtures {
     }
   }
 
-
   static class ValidApiImpl implements ValidApi {
-
-    private final ConnectionContext ctx;
-
-    public ValidApiImpl(ConnectionContext ctx) {
-      this.ctx = ctx;
-    }
 
     @Override
     public Contract contract() {
@@ -119,7 +103,6 @@ class HandlerResolverApiResolutionFixtures {
     Flux<String> stream(String request);
   }
 
-
   @R2Api("another-contract")
   interface AnotherValidApi {
 
@@ -132,7 +115,6 @@ class HandlerResolverApiResolutionFixtures {
     public Flux<String> stream(String request) {
       return Flux.just(request);
     }
-
   }
 
   @Service("another-contract")
@@ -150,7 +132,7 @@ class HandlerResolverApiResolutionFixtures {
     }
   }
 
-  @R2ApiName("no-name")
+  @R2Api("no-name")
   interface NonApi {
 
     AnotherContract contract();
@@ -158,22 +140,14 @@ class HandlerResolverApiResolutionFixtures {
 
   @R2Api("renamed-contract")
   interface RenamedValidApi extends ValidApi {
+
   }
 
   static class RenamedValidApiImpl implements RenamedValidApi {
 
-
     @Override
     public Contract contract() {
       return new ContractHandler();
-    }
-  }
-
-  static class NonApiImpl implements NonApi {
-
-    @Override
-    public AnotherContract contract() {
-      return new AnotherContractHandler();
     }
   }
 

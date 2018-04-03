@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.R2ApiName;
 import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import java.lang.annotation.Annotation;
@@ -152,27 +151,19 @@ public class HandlersResolver implements
     }
 
     static Optional<String> findApiName(Class<?> maybeApi) {
-      R2ApiName r2ApiName = findAnnotation(maybeApi, R2ApiName.class);
-      R2Api r2Api = findAnnotation(maybeApi, R2Api.class);
-      if (r2ApiName != null) {
-        if (r2Api != null) {
-          return Optional.of(r2ApiName.value());
-        } else {
-          String msg = String
-              .format("%s: @R2ApiName is present without @R2Api",
-                  maybeApi.getName());
-          throw new IllegalArgumentException(msg);
-        }
-      } else if (r2Api != null) {
-        return Optional.of(r2Api.value());
-      } else {
-        return Optional.empty();
-      }
+      return Optional.ofNullable(
+          findAnnotation(maybeApi, R2Api.class))
+          .map(R2Api::value);
     }
 
     private static Optional<String> findApiImplName(Class<?> apiImplType) {
-      return Optional.ofNullable(findAnnotation(apiImplType, R2ApiName.class))
-          .map(R2ApiName::value);
+      return Optional.ofNullable(findDeclaredAnnotation(apiImplType, R2Api.class))
+          .map(R2Api::value);
+    }
+
+    private static <T extends Annotation> T findDeclaredAnnotation(Class<?> apiImplType,
+        Class<T> anno) {
+      return apiImplType.getDeclaredAnnotation(anno);
     }
 
     private static <T extends Annotation> T findAnnotation(Class<?> target,
