@@ -1,14 +1,16 @@
 
 r2rpc:
+
  server:
+
   defaults:
-    codecs:
-      - jackson
+    codecs: [jackson]
     transport: tcp
+
   endpoints:
     - name: foo
       port: 8083
-      api: baz
+      api: [bar, baz]
 
 logging:
   level:

@@ -8,7 +8,7 @@ public class R2Properties {
   private String transport;
   private int port;
   private List<String> codecs;
-  private String api;
+  private List<String> api;
   private boolean enabled = true;
 
   public String getName() {
@@ -43,11 +43,11 @@ public class R2Properties {
     this.codecs = codecs;
   }
 
-  public String getApi() {
+  public List<String> getApi() {
     return api;
   }
 
-  public void setApi(String api) {
+  public void setApi(List<String> api) {
     this.api = api;
   }
 

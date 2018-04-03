@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.example.api;
+package com.github.mostroverkhov.r2.example.api.baz;
 
 import com.github.mostroverkhov.r2.core.contract.RequestStream;
 import com.github.mostroverkhov.r2.core.contract.Service;

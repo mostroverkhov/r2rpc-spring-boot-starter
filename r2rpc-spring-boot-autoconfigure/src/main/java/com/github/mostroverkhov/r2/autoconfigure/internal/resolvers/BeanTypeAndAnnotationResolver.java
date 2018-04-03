@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 class BeanTypeAndAnnotationResolver<
     Type,
-    Anno extends Annotation> extends Resolver<String, Type> {
+    Anno extends Annotation> extends CachingResolver<String, Type> {
 
   private final R2BeanLocator beanLocator;
   private final Class<Type> type;

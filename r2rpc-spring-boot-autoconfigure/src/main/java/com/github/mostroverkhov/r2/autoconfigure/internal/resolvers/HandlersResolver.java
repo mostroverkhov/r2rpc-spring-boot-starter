@@ -2,114 +2,244 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.resolvers;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.R2ApiName;
-import com.github.mostroverkhov.r2.autoconfigure.R2ServerApiHandlers;
+import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 
-public class HandlersResolver extends
-    Resolver<String, Function<ConnectionContext, List<Object>>> {
+public class HandlersResolver implements
+    Resolver<List<String>, ServiceHandlersFactory> {
 
-  private ApplicationContext ctx;
+  private final Supplier<Collection<ServerApiProvider>> providersSupplier;
+  private Map<String, Api> cache;
 
   public HandlersResolver(ApplicationContext ctx) {
-    super(HandlersResolver::error);
-    this.ctx = ctx;
+    Objects.requireNonNull(ctx);
+    this.providersSupplier = () ->
+        ctx.getBeansOfType(ServerApiProvider.class)
+            .values();
+  }
+
+  HandlersResolver(
+      Supplier<Collection<ServerApiProvider>> providersSupplier) {
+    this.providersSupplier = providersSupplier;
   }
 
   @Override
-  public Function<ConnectionContext, List<Object>> resolve(String key) {
-    if (key == null) {
-      return ctx -> Collections.emptyList();
-    } else {
-      return super.resolve(key);
+  public ServiceHandlersFactory resolve(List<String> keys) {
+    Objects.requireNonNull(keys);
+
+    Set<String> uniqueKeys = new HashSet<>(keys);
+    if (uniqueKeys.size() != keys.size()) {
+      throw new IllegalArgumentException("Keys are not unique: " + keys);
     }
-  }
 
-  @Override
-  void resolveAll(Map<String, Function<ConnectionContext, List<Object>>> cache) {
-    Collection<R2ServerApiHandlers> apiHandlers = ctx
-        .getBeansOfType(R2ServerApiHandlers.class)
-        .values();
-
-    apiHandlers.forEach(h -> {
-      Optional<String> handlersName = getHandlersName(h);
-      handlersName.ifPresent(name -> {
-        Function<ConnectionContext, List<Object>> f = ctx -> {
-          Object handlersInstance = h.apply(ctx);
-          return stream(handlersInstance
-              .getClass()
-              .getMethods())
-              .filter(m -> m.getDeclaringClass() != Object.class)
-              .map(m -> call(m, handlersInstance))
-              .collect(toList());
-        };
-        cache.put(name, f);
+    if (cache == null) {
+      cache = new HashMap<>();
+      resolveAll().forEach(api -> {
+        String name = api.name();
+        Api prev = cache.put(name, api);
+        if (prev != null) {
+          throw new IllegalArgumentException("Duplicate API implementation: " + name);
+        }
       });
-    });
+    }
+    return asFactory(resolveApiNames(uniqueKeys));
   }
 
-  private Object call(Method m, Object target) {
-    try {
-      m.setAccessible(true);
-      return m.invoke(target);
-    } catch (Exception e) {
-      String msg = String.format("Could not invoke %s on %s",
-          m.getName(),
-          target.getClass().getName());
-      throw new IllegalStateException(msg, e);
+  Collection<Api> resolveAll() {
+    return providersSupplier
+        .get()
+        .stream()
+        .map(ApiResolveSteps::findProviderApi)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(toList());
+  }
+
+  private static ServiceHandlersFactory asFactory(Collection<Api> apis) {
+    Set<Class<?>> apiTypes = apis
+        .stream()
+        .map(Api::type)
+        .collect(toSet());
+    if (apiTypes.size() != apis.size()) {
+      throw new IllegalArgumentException("There must be at most 1"
+          + " implementation of API per endpoint");
+    }
+    return connCtx ->
+        apis.stream()
+            .flatMap(api ->
+                api.svcHandlersFactory()
+                    .apply(connCtx)
+                    .stream())
+            .collect(Collectors.toList());
+  }
+
+  private Collection<Api> resolveApiNames(Set<String> apiNames) {
+    return apiNames.stream()
+        .map(name -> {
+          Api api = cache.get(name);
+          if (api == null) {
+            throw new IllegalArgumentException(
+                "Absent API implementation for name: " + name);
+          }
+          return api;
+        })
+        .collect(toList());
+  }
+
+  static class ApiResolveSteps {
+
+    private static Optional<Api> findProviderApi(ServerApiProvider apiImplProvider) {
+      Class<?> apisImplType = apiImplType(apiImplProvider);
+      Class<?>[] maybeApis = apisImplType.getInterfaces();
+      List<Api> apis = stream(maybeApis)
+          .map(maybeApi -> findApi(maybeApi, apiImplProvider))
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .collect(toList());
+
+      int apisSize = apis.size();
+      if (apisSize > 1) {
+        String msg = String
+            .format("API implementation %s has of multiple APIs: %d",
+                apisImplType.getName(),
+                apisSize);
+        throw new IllegalArgumentException(msg);
+      }
+      return apis.isEmpty()
+          ? Optional.empty()
+          : Optional.of(overrideApiName(apis.get(0), apisImplType));
+    }
+
+    private static Api overrideApiName(Api api, Class<?> apiImplType) {
+      return findApiImplName(apiImplType)
+          .map(api::copyWithName)
+          .orElse(api);
+    }
+
+    private static Class<?> apiImplType(ServerApiProvider apiImplProvider) {
+      try {
+        Method method = apiImplProvider
+            .getClass()
+            .getMethod(
+                "apply",
+                ConnectionContext.class);
+        return method.getReturnType();
+      } catch (NoSuchMethodException e) {
+        throw new AssertionError(
+            "ServerApiProvider is expected "
+                + "to have T apply(ConnectionContext c) method",
+            e);
+      }
+    }
+
+    private static Optional<Api> findApi(
+        Class<?> maybeApiType,
+        ServerApiProvider<?> apiImplProvider) {
+      return findApiName(maybeApiType)
+          .map(name -> new Api(name, maybeApiType, apiImplProvider));
+    }
+
+    static Optional<String> findApiName(Class<?> maybeApi) {
+      return Optional.ofNullable(
+          findAnnotation(maybeApi, R2Api.class))
+          .map(R2Api::value);
+    }
+
+    private static Optional<String> findApiImplName(Class<?> apiImplType) {
+      return Optional.ofNullable(findDeclaredAnnotation(apiImplType, R2Api.class))
+          .map(R2Api::value);
+    }
+
+    private static <T extends Annotation> T findDeclaredAnnotation(Class<?> apiImplType,
+        Class<T> anno) {
+      return apiImplType.getDeclaredAnnotation(anno);
+    }
+
+    private static <T extends Annotation> T findAnnotation(Class<?> target,
+        Class<T> anno) {
+      return AnnotationUtils
+          .findAnnotation(target, anno);
     }
   }
 
-  private Optional<String> getHandlersName(R2ServerApiHandlers h) {
-    try {
-      Method method = h.getClass()
-          .getMethod(
-              "apply",
-              ConnectionContext.class);
+  static final class Api {
 
-      String apiName = Optional.ofNullable(findApiName(method))
-          .map(R2ApiName::value)
-          .orElseGet(() -> Optional.ofNullable(findApi(method))
-              .map(R2Api::value).orElse(null));
+    private final String name;
+    private final Class<?> type;
+    private final Function<ConnectionContext, Collection<Object>> svcHandlersFactory;
 
-      return Optional
-          .ofNullable(apiName);
-
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(
-          "R2ServerApiHandlers must have T apply(ConnectionContext c) method",
-          e);
+    Api(
+        String name,
+        Class<?> type,
+        ServerApiProvider<?> apiImplProvider) {
+      this(name,
+          type,
+          apiImplProvider.andThen(resolveSvcHandlers(type)));
     }
-  }
 
-  private static R2Api findApi(Method method) {
-    return findAnnotation(method, R2Api.class);
-  }
+    private Api(
+        String name,
+        Class<?> type,
+        Function<ConnectionContext, Collection<Object>> svcHandlersFactory) {
+      Objects.requireNonNull(name);
+      Objects.requireNonNull(type);
+      Objects.requireNonNull(svcHandlersFactory);
+      this.name = name;
+      this.type = type;
+      this.svcHandlersFactory = svcHandlersFactory;
+    }
 
-  private static R2ApiName findApiName(Method method) {
-    return findAnnotation(method, R2ApiName.class);
-  }
+    public Api copyWithName(String name) {
+      return new Api(name, type, svcHandlersFactory);
+    }
 
-  private static <T extends Annotation> T findAnnotation(Method method, Class<T> anno) {
-    return AnnotationUtils
-        .findAnnotation(
-            method.getReturnType(),
-            anno);
-  }
+    public String name() {
+      return name;
+    }
 
-  private static String error(String apiName) {
-    return String.format("No API handlers registered for name: %s", apiName);
+    public Class<?> type() {
+      return type;
+    }
+
+    public Function<ConnectionContext, Collection<Object>> svcHandlersFactory() {
+      return svcHandlersFactory;
+    }
+
+    private static Function<Object, Collection<Object>> resolveSvcHandlers(Class<?> apiType) {
+      return apiImpl ->
+          stream(
+              apiType.getMethods())
+              .map(m -> call(m, apiImpl))
+              .collect(toList());
+    }
+
+    private static Object call(Method m, Object target) {
+      try {
+        return m.invoke(target);
+      } catch (Exception e) {
+        String msg = String.format("Could not invoke %s on %s",
+            m.getName(),
+            target.getClass().getName());
+        throw new IllegalStateException(msg, e);
+      }
+    }
   }
 }

@@ -11,19 +11,60 @@ Simplifies creation of `R2RPC` servers by providing:
 r2rpc:
  server:
   defaults:
-    codecs:
-      - jackson
+    codecs: [jackson]
     transport: tcp
   endpoints:
     - name: foo
       port: 8083
-      api: baz
+      api: [baz, bar]
+```
+Custom transports can be provided as `@R2ServerTransport` annotated Spring beans, and custom codecs - with `@R2DataCodec`.
+
+`api` is set of API interfaces annotated with `R2Api(name)`, each aggregates [R2RPC](https://github.com/mostroverkhov/r2) service definitions. Its implementation serves as Endpoint handler, and must be provided to Spring with 
+`ServerApiProvider` bean for each API implementation.   
+
+API definitions allow to group related R2RPC services in one namespace so they can be shared more conveniently.
+
+Single API definition, referred in configuration as `api:[example]`, can be as follows
+
+```
+@R2Api("example")
+public interface ExampleApi {
+
+  BazContract bazContract();
+  
+  BarContract barContract();
+}
+```
+`BazContract` and `BarContract` are R2RPC service definitions, e.g.
+
+```java
+@Service("baz")
+public interface BazContract {
+
+  @RequestStream("bazStream")
+  Flux<Baz> baz(Baz baz);
+}
 ```
 
-`api` refers to API interface annotated with `R2Api(name)`, which aggregates [R2RPC](https://github.com/mostroverkhov/r2) service definitions. Its implementation serves as Endpoint handler, and must be provided to Spring with 
-`R2ServerApiHandlers` bean (`BazServerApiHandlers` in library example).   
+API definition is exposed to Spring with `ServerApiProvider<ExampleApiImpl>` implementation,
+where `ExampleApiImpl` is implementation of `ExampleApi` providing handlers for incoming 
+requests.
+```java
+public class BarApiProvider implements ServerApiProvider<BarApiImpl> {
 
-Additional transports can be declared as `@R2ServerTransport` annotated Spring beans, codecs - `@R2DataCodec`.
+  @Override
+  public BarApiImpl apply(ConnectionContext connectionContext) {
+    return new BarApiImpl();
+  }
+}
+```
+API definitions are constrained by following rules
+* All definitions must have unique names. If several implementations of same API are necessary, 
+override name on implementation itself by annotating It with `@R2API(newName)`
+* API implementation (handler) must implement at most 1 (one) API definition
+* API implementations per endpoint must contribute API definitions of unique type 
+  (in other words, no more than one implementation of particular API per endpoint)
 
 ### Examples
 

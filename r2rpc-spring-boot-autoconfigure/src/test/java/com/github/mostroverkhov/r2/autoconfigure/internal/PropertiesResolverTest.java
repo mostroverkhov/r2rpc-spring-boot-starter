@@ -158,7 +158,7 @@ public class PropertiesResolverTest {
     mockProps = new R2Properties();
     mockProps.setName(name);
     mockProps.setCodecs(Collections.singletonList(codec));
-    mockProps.setApi(api);
+    mockProps.setApi(Arrays.asList(api));
     mockProps.setTransport(transport);
     mockProps.setPort(port);
 

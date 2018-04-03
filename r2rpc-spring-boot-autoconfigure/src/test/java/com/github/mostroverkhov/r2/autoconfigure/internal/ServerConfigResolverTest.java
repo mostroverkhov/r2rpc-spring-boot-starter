@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
-import com.github.mostroverkhov.r2.autoconfigure.R2ServerApiHandlers;
+import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransport;
-import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.Metadata.Builder;
@@ -17,6 +17,8 @@ import io.rsocket.RSocketFactory;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.netty.server.NettyContextCloseable;
 import io.rsocket.transport.netty.server.TcpServerTransport;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -68,9 +70,11 @@ public class ServerConfigResolverTest {
 
     assertThat(serverConfig.rSocketFactory()).isNotNull();
 
-    Function<ConnectionContext, List<Object>> handlers = serverConfig.handlers();
+    Function<ConnectionContext, Collection<Object>> handlers =
+        serverConfig.handlers();
     assertThat(handlers).isNotNull();
-    List<Object> actualHandlers = handlers.apply(new ConnectionContext(new Builder().build()));
+    Collection<Object> actualHandlers = handlers
+        .apply(new ConnectionContext(new Builder().build()));
     assertThat(actualHandlers).isNotNull().hasSize(1);
   }
 
@@ -85,9 +89,13 @@ public class ServerConfigResolverTest {
         .isNotNull()
         .hasSize(1);
 
-    Function<ConnectionContext, List<Object>> handlers = resolved.iterator().next().handlers();
+    Function<ConnectionContext, Collection<Object>> handlers = resolved
+        .iterator()
+        .next()
+        .handlers();
     assertThat(handlers).isNotNull();
-    List<Object> actualHandlers = handlers.apply(new ConnectionContext(new Builder().build()));
+    Collection<Object> actualHandlers = handlers
+        .apply(new ConnectionContext(new Builder().build()));
     assertThat(actualHandlers).isNotNull().hasSize(0);
   }
 
@@ -109,7 +117,7 @@ public class ServerConfigResolverTest {
     R2Properties props = new R2Properties();
     props.setName("test");
     props.setPort(8081);
-    props.setApi("baz");
+    props.setApi(Arrays.asList("baz"));
     props.setTransport("tcp");
     props.setCodecs(Collections.singletonList("jackson"));
     return props;
@@ -119,8 +127,8 @@ public class ServerConfigResolverTest {
   static class TestConfig {
 
     @Bean
-    public BazServerApiHandlers handlers() {
-      return new BazServerApiHandlers();
+    public BazServerApiProvider handlers() {
+      return new BazServerApiProvider();
     }
 
     @Bean
@@ -136,7 +144,7 @@ public class ServerConfigResolverTest {
 
     @Bean
     @R2ServerTransport("tcp")
-    public R2ServerTransportFactory<NettyContextCloseable> defaultTransport() {
+    public ServerTransportFactory<NettyContextCloseable> defaultTransport() {
       return TcpServerTransport::create;
     }
   }
@@ -197,7 +205,7 @@ public class ServerConfigResolverTest {
     }
   }
 
-  static class BazServerApiHandlers implements R2ServerApiHandlers<BazApiImpl> {
+  static class BazServerApiProvider implements ServerApiProvider<BazApiImpl> {
 
     @Override
     public BazApiImpl apply(ConnectionContext connectionContext) {

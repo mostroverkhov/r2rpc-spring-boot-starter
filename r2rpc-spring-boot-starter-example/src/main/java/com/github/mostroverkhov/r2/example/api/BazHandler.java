@@ -1,5 +1,7 @@
 package com.github.mostroverkhov.r2.example.api;
 
+import com.github.mostroverkhov.r2.example.api.baz.Baz;
+import com.github.mostroverkhov.r2.example.api.baz.BazContract;
 import java.time.Duration;
 import reactor.core.publisher.Flux;
 

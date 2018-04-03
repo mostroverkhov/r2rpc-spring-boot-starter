@@ -9,6 +9,8 @@ import com.github.mostroverkhov.r2.java.R2Server;
 import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.ServerTransport;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -87,7 +89,7 @@ class ServersLifecycle implements SmartLifecycle {
 
   private Mono<Closeable> serverStart(ServerConfig serverConfig) {
     ServerTransport<Closeable> transport = serverConfig.transport();
-    Function<ConnectionContext, List<Object>> handlers = serverConfig.handlers();
+    Function<ConnectionContext, Collection<Object>> handlers = serverConfig.handlers();
     List<DataCodec> codecs = serverConfig.codecs();
     ServerRSocketFactory rSocketFactory = serverConfig.rSocketFactory();
 
@@ -111,9 +113,9 @@ class ServersLifecycle implements SmartLifecycle {
 
   private Services addHandlers(
       ConnectionContext ctx,
-      Function<ConnectionContext, List<Object>> handlerFactory) {
+      Function<ConnectionContext, Collection<Object>> handlerFactory) {
     Services services = new Services();
-    List<Object> handlers = handlerFactory.apply(ctx);
+    Collection<Object> handlers = handlerFactory.apply(ctx);
     handlers.forEach(services::add);
     return services;
   }
