@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.toSet;
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.R2ApiName;
 import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
-import com.github.mostroverkhov.r2.autoconfigure.internal.ServiceHandlersFactory;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,6 +30,7 @@ public class HandlersResolver implements
   private Map<String, Api> cache;
 
   public HandlersResolver(ApplicationContext ctx) {
+    Objects.requireNonNull(ctx);
     this.providersSupplier = () ->
         ctx.getBeansOfType(ServerApiProvider.class)
             .values();
@@ -38,28 +38,26 @@ public class HandlersResolver implements
 
   HandlersResolver(
       Supplier<Collection<ServerApiProvider>> providersSupplier) {
-    Objects.requireNonNull(providersSupplier);
     this.providersSupplier = providersSupplier;
   }
 
   @Override
   public ServiceHandlersFactory resolve(Set<String> keys) {
+    Objects.requireNonNull(keys);
     if (cache == null) {
       cache = new HashMap<>();
-      resolveAll(providersSupplier)
-          .forEach(api -> {
-            String name = api.name();
-            Api prev = cache.put(name, api);
-            if (prev != null) {
-              throw new IllegalArgumentException("Duplicate API implementation: " + name);
-            }
-          });
+      resolveAll().forEach(api -> {
+        String name = api.name();
+        Api prev = cache.put(name, api);
+        if (prev != null) {
+          throw new IllegalArgumentException("Duplicate API implementation: " + name);
+        }
+      });
     }
     return asFactory(resolveApiNames(keys));
   }
 
-  static Collection<Api> resolveAll(
-      Supplier<Collection<ServerApiProvider>> providersSupplier) {
+  Collection<Api> resolveAll() {
     return providersSupplier
         .get()
         .stream()
@@ -75,7 +73,7 @@ public class HandlersResolver implements
         .map(Api::type)
         .collect(toSet());
     if (apiTypes.size() != apis.size()) {
-      throw new IllegalStateException("There must be at most 1"
+      throw new IllegalArgumentException("There must be at most 1"
           + " implementation of API per endpoint");
     }
     return connCtx ->
