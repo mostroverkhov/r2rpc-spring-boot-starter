@@ -17,6 +17,7 @@ import io.rsocket.RSocketFactory;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.netty.server.NettyContextCloseable;
 import io.rsocket.transport.netty.server.TcpServerTransport;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -116,7 +117,7 @@ public class ServerConfigResolverTest {
     R2Properties props = new R2Properties();
     props.setName("test");
     props.setPort(8081);
-    props.setApi("baz");
+    props.setApi(Arrays.asList("baz"));
     props.setTransport("tcp");
     props.setCodecs(Collections.singletonList("jackson"));
     return props;

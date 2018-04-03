@@ -11,6 +11,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 
 public class HandlersResolver implements
-    Resolver<Set<String>, ServiceHandlersFactory> {
+    Resolver<List<String>, ServiceHandlersFactory> {
 
   private final Supplier<Collection<ServerApiProvider>> providersSupplier;
   private Map<String, Api> cache;
@@ -41,8 +42,14 @@ public class HandlersResolver implements
   }
 
   @Override
-  public ServiceHandlersFactory resolve(Set<String> keys) {
+  public ServiceHandlersFactory resolve(List<String> keys) {
     Objects.requireNonNull(keys);
+
+    Set<String> uniqueKeys = new HashSet<>(keys);
+    if (uniqueKeys.size() != keys.size()) {
+      throw new IllegalArgumentException("Keys are not unique: " + keys);
+    }
+
     if (cache == null) {
       cache = new HashMap<>();
       resolveAll().forEach(api -> {
@@ -53,7 +60,7 @@ public class HandlersResolver implements
         }
       });
     }
-    return asFactory(resolveApiNames(keys));
+    return asFactory(resolveApiNames(uniqueKeys));
   }
 
   Collection<Api> resolveAll() {

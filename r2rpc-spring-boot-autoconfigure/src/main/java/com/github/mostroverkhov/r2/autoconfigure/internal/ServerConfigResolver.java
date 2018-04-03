@@ -67,9 +67,8 @@ class ServerConfigResolver {
     List<DataCodec> codecs = codecResolver
         .resolve(props.getCodecs());
 
-    Set<String> apis = Optional.ofNullable(props.getApi())
-        .map(Collections::singleton)
-        .orElse(emptySet());
+    List<String> apis = Optional.ofNullable(props.getApi())
+        .orElse(emptyList());
     Function<ConnectionContext, Collection<Object>> handlers =
         handlersResolver.resolve(apis);
 

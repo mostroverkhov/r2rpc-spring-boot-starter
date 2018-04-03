@@ -19,9 +19,8 @@ import com.github.mostroverkhov.r2.core.Metadata.Builder;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 import org.junit.Test;
 
 public class HandlerResolverApiResolutionTest {
@@ -29,7 +28,7 @@ public class HandlerResolverApiResolutionTest {
   @Test
   public void resolveSingleValidProvider() {
     HandlersResolver handlersResolver = fromProviders(
-            new ValidApiProvider());
+        new ValidApiProvider());
     Collection<Api> apis = handlersResolver.resolveAll();
     assertThat(apis).hasSize(1);
     assertThat(apis)
@@ -40,7 +39,7 @@ public class HandlerResolverApiResolutionTest {
   @Test
   public void resolveSingleValidProviderApiAndApiName() {
     HandlersResolver handlersResolver = fromProviders(
-            new ValidNamedApiProvider());
+        new ValidNamedApiProvider());
     Collection<Api> apis = handlersResolver.resolveAll();
     assertThat(apis).hasSize(1);
     assertThat(apis)
@@ -51,8 +50,8 @@ public class HandlerResolverApiResolutionTest {
   @Test
   public void resolveMultipleValidProviders() {
     HandlersResolver handlersResolver = fromProviders(
-            new ValidApiProvider(),
-            new ValidNamedApiProvider());
+        new ValidApiProvider(),
+        new ValidNamedApiProvider());
     Collection<Api> apis = handlersResolver.resolveAll();
     assertThat(apis).hasSize(2);
     assertThat(apis)
@@ -67,7 +66,7 @@ public class HandlerResolverApiResolutionTest {
   @Test
   public void resolveProviderRenamed() {
     HandlersResolver handlersResolver = fromProviders(
-            new RenamedValidApiProvider());
+        new RenamedValidApiProvider());
     Collection<Api> apis = handlersResolver.resolveAll();
     assertThat(apis).hasSize(1);
     assertThat(apis)
@@ -80,7 +79,7 @@ public class HandlerResolverApiResolutionTest {
   @Test
   public void resolveSingleProviderNoApis() {
     HandlersResolver handlersResolver = fromProviders(
-            new NoApisProvider());
+        new NoApisProvider());
     Collection<Api> apis = handlersResolver.resolveAll();
     assertThat(apis).isEmpty();
   }
@@ -88,7 +87,7 @@ public class HandlerResolverApiResolutionTest {
   @Test(expected = IllegalArgumentException.class)
   public void resolveSingleProviderMultipleApis() {
     HandlersResolver handlersResolver = fromProviders(
-            new TwoApisProvider());
+        new TwoApisProvider());
     handlersResolver.resolveAll();
   }
 
@@ -97,7 +96,7 @@ public class HandlerResolverApiResolutionTest {
     HandlersResolver handlersResolver = fromProviders(
         new ValidApiProvider(),
         new ValidNamedApiProvider());
-    Set<String> keys = keys("contract", "named-contract");
+    List<String> keys = keys("contract", "named-contract");
     ServiceHandlersFactory serviceHandlersFactory = handlersResolver.resolve(keys);
 
     assertThat(serviceHandlersFactory).isNotNull();
@@ -117,7 +116,7 @@ public class HandlerResolverApiResolutionTest {
             new AnotherValidApiProvider(),
             new ValidNamedApiProvider()));
 
-    Set<String> keys = keys("another-contract", "named-contract");
+    List<String> keys = keys("another-contract", "named-contract");
     handlersResolver.resolve(keys);
   }
 
@@ -130,14 +129,21 @@ public class HandlerResolverApiResolutionTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void resolveProvidersMissingApi() {
+  public void resolveServiceFactoryDuplicateKeys() {
+    HandlersResolver handlersResolver = fromProviders(
+        new ValidApiProvider());
+    handlersResolver.resolve(keys("contract", "contract"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void resolveServiceFactoryMissingApi() {
     HandlersResolver handlersResolver = fromProviders(
         new ValidApiProvider());
     handlersResolver.resolve(keys("missing"));
   }
 
-  static Set<String> keys(String... keys) {
-    return new HashSet<>(Arrays.asList(keys));
+  static List<String> keys(String... keys) {
+    return Arrays.asList(keys);
   }
 
   static HandlersResolver fromProviders(ServerApiProvider<?>... providers) {
