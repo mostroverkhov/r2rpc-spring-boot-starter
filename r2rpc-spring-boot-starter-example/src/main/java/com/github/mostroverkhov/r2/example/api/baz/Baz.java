@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.example.api;
+package com.github.mostroverkhov.r2.example.api.baz;
 
 public class Baz {
 
