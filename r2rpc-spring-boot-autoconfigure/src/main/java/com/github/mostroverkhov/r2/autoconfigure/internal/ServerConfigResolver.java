@@ -14,7 +14,6 @@ import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.ServerTransport;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -54,6 +53,8 @@ class ServerConfigResolver {
 
   private ServerConfig resolveServerConfig(R2Properties props) {
 
+    String name = props.getName();
+
     ServerRSocketFactory rSocketFactory = serverRSocketFactoryResolver.resolve(ctx);
 
     @SuppressWarnings("unchecked")
@@ -72,7 +73,6 @@ class ServerConfigResolver {
     Function<ConnectionContext, Collection<Object>> handlers =
         handlersResolver.resolve(apis);
 
-    return new ServerConfig(rSocketFactory, transport, codecs, handlers);
+    return new ServerConfig(name, rSocketFactory, transport, codecs, handlers);
   }
-
 }

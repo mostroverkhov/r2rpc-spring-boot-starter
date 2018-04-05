@@ -1,6 +1,8 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.NamedStart;
 import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.ServersStarter;
+import com.github.mostroverkhov.r2.autoconfigure.server.controls.EndpointSupport;
 import io.rsocket.Closeable;
 import java.time.Duration;
 import java.util.List;
@@ -15,15 +17,16 @@ import reactor.test.StepVerifier;
 public class ServerStarterTest {
 
   private CloseableFactory factory;
+  private ServersStarter starter;
 
   @Before
   public void setUp() {
     factory = new CloseableFactory(200, 200);
+    starter = new ServersStarter(new EndpointSupport(), starts());
   }
 
   @Test
   public void startsSuccessfully() {
-    ServersStarter starter = new ServersStarter(starts());
     StepVerifier.create(starter.start()
         .flatMapIterable(l -> l))
         .expectNextCount(5)
@@ -33,7 +36,7 @@ public class ServerStarterTest {
 
   @Test
   public void startsPartialSuccessfully() {
-    StepVerifier.create(new ServersStarter(startsWithError())
+    StepVerifier.create(starter
         .start()
         .flatMapIterable(l -> l))
         .expectNextCount(4)
@@ -43,7 +46,6 @@ public class ServerStarterTest {
 
   @Test
   public void closesSucessfully() {
-    ServersStarter starter = new ServersStarter(starts());
     StepVerifier.create(starter
         .start()
         .then(starter.stop())
@@ -54,31 +56,31 @@ public class ServerStarterTest {
 
   @Test
   public void closesPartialSucessfully() {
-    ServersStarter starter = new ServersStarter(startsWithError());
     StepVerifier.create(starter.start()
         .then(starter.stop()).then(starter.onStop()))
         .expectComplete()
         .verify(Duration.ofSeconds(10));
   }
 
-  private List<Mono<Closeable>> startsWithError() {
+  private List<NamedStart> startsWithError() {
     return Flux.range(0, 5)
         .map(v -> {
+          String val = String.valueOf(v);
           if (v == 4) {
-            return factory.error();
+            return factory.error(val);
           } else {
-            return factory.create();
+            return factory.create(val);
           }
         })
         .collectList()
         .block();
   }
 
-  private List<Mono<Closeable>> starts() {
+  private List<NamedStart> starts() {
     return Flux.range(0, 5)
-          .map(v -> factory.create())
-          .collectList()
-          .block();
+        .map(v -> factory.create(String.valueOf(v)))
+        .collectList()
+        .block();
   }
 
   static class CloseableFactory {
@@ -94,14 +96,16 @@ public class ServerStarterTest {
       this.closeDelayMillis = closeDelayMillis;
     }
 
-    public Mono<Closeable> create() {
-      return Mono.delay(Duration.ofMillis(monoDelayMillis))
+    public NamedStart create(String name) {
+      Mono<Closeable> closeable = Mono.delay(Duration.ofMillis(monoDelayMillis))
           .map(l -> new MockCloseable(closeDelayMillis));
+      return new NamedStart(name, closeable);
     }
 
-    public Mono<Closeable> error() {
-      return Mono.delay(Duration.ofMillis(monoDelayMillis))
+    public NamedStart error(String name) {
+      Mono<Closeable> err = Mono.delay(Duration.ofMillis(monoDelayMillis))
           .flatMap(l -> Mono.error(new Throwable("err")));
+      return new NamedStart(name, err);
     }
 
   }

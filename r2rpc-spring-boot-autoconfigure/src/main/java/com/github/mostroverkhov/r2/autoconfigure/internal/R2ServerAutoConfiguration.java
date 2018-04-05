@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransport;
 import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.server.controls.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.server.controls.ServerControls;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import io.rsocket.RSocketFactory;
@@ -55,11 +57,26 @@ public class R2ServerAutoConfiguration {
   }
 
   @Bean
+  EndpointSupport endpointSupport() {
+    return new EndpointSupport();
+  }
+
+  @Bean
+  public ServerControls serverControls(EndpointSupport endpointSupport) {
+    return new ServerControls(
+        endpointSupport.starts(),
+        endpointSupport.stops());
+  }
+
+  @Bean
   public ServersLifecycle serversStarter() {
     return new ServersLifecycle.Builder(
         fallbackProps(),
         applicationContext)
-        .build(defaultProperties, r2RootProperties.getEndpoints());
+        .build(
+            defaultProperties,
+            r2RootProperties.getEndpoints(),
+            endpointSupport());
   }
 
   static R2DefaultProperties fallbackProps() {

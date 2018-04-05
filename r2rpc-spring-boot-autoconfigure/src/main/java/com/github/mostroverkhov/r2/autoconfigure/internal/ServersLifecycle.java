@@ -1,6 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
+import com.github.mostroverkhov.r2.autoconfigure.server.controls.EndpointSupport;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.responder.Codecs;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
@@ -10,7 +11,6 @@ import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.ServerTransport;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -36,11 +36,14 @@ class ServersLifecycle implements SmartLifecycle {
 
   private volatile boolean isRunning;
   private final Set<ServerConfig> configs;
+  private EndpointSupport endpointSupport;
   private final ExecutorService serversRunner = Executors.newSingleThreadExecutor();
   private volatile ServersStarter serversStarter;
 
-  public ServersLifecycle(Set<ServerConfig> configs) {
+  public ServersLifecycle(Set<ServerConfig> configs,
+      EndpointSupport endpointSupport) {
     this.configs = configs;
+    this.endpointSupport = endpointSupport;
   }
 
   @Override
@@ -50,7 +53,7 @@ class ServersLifecycle implements SmartLifecycle {
 
   @Override
   public void start() {
-    serversStarter = new ServersStarter(serverStarts(configs));
+    serversStarter = new ServersStarter(endpointSupport, serverStarts(configs));
     serversRunner.execute(
         () -> serversStarter
             .start()
@@ -81,19 +84,20 @@ class ServersLifecycle implements SmartLifecycle {
     return Integer.MAX_VALUE;
   }
 
-  private List<Mono<Closeable>> serverStarts(Set<ServerConfig> serverConfigs) {
+  private List<NamedStart> serverStarts(Set<ServerConfig> serverConfigs) {
     return serverConfigs.stream()
         .map(this::serverStart)
         .collect(Collectors.toList());
   }
 
-  private Mono<Closeable> serverStart(ServerConfig serverConfig) {
+  private NamedStart serverStart(ServerConfig serverConfig) {
+    String name = serverConfig.getName();
     ServerTransport<Closeable> transport = serverConfig.transport();
     Function<ConnectionContext, Collection<Object>> handlers = serverConfig.handlers();
     List<DataCodec> codecs = serverConfig.codecs();
     ServerRSocketFactory rSocketFactory = serverConfig.rSocketFactory();
 
-    return new R2Server<>()
+    Mono<Closeable> start = new R2Server<>()
         .configureAcceptor(
             acceptor ->
                 acceptor
@@ -103,6 +107,8 @@ class ServersLifecycle implements SmartLifecycle {
         .connectWith(rSocketFactory)
         .transport(transport)
         .start();
+
+    return new NamedStart(name, start);
   }
 
   private Codecs addCodecs(List<DataCodec> codecList) {
@@ -160,39 +166,102 @@ class ServersLifecycle implements SmartLifecycle {
 
   static class ServersStarter {
 
-    private final MonoProcessor<List<Closeable>> started = MonoProcessor.create();
-    private final List<Mono<Closeable>> starts;
+    private final EndpointSupport endpointSupport;
+    private final MonoProcessor<List<NamedStarted>> started = MonoProcessor.create();
+    private final Flux<NamedStart> starts;
 
-    public ServersStarter(List<Mono<Closeable>> starts) {
-      this.starts = starts;
+    public ServersStarter(
+        EndpointSupport endpointSupport,
+        List<NamedStart> starts) {
+      this.endpointSupport = endpointSupport;
+      this.starts = Flux.fromIterable(starts);
     }
 
     public Mono<List<Closeable>> start() {
-      Flux.fromIterable(starts)
-          .flatMap(start -> start.onErrorResume(err -> Mono.empty()))
-          .collectList()
+      starts.flatMap(start ->
+          start
+              .serverStart()
+              .doOnNext(notUsed -> endpointSupport.startSucceeded(start.name()))
+              .doOnError(err -> endpointSupport.startFailed(start.name(), err))
+              .onErrorResume(err -> Mono.empty())
+              .map(closeable ->
+                  new NamedStarted(
+                      start.name(),
+                      closeable))
+      ).collectList()
+          .doOnNext(notUsed -> endpointSupport.startCompleted())
           .subscribe(started);
 
-      return started;
+      return started
+          .flatMap(startedList ->
+              Flux.fromIterable(startedList)
+                  .map(NamedStarted::started)
+                  .collectList());
     }
 
     public Mono<Void> stop() {
-      return started.flatMap(closeableList -> {
-        Flux<Closeable> closeables = Flux.fromIterable(closeableList);
-        return closeables
-            .flatMap(Closeable::close)
-            .then(closeables
-                .flatMap(Closeable::onClose)
-                .then());
-      });
+      return started
+          .flatMap(startedList -> {
+            Flux<NamedStarted> started = Flux.fromIterable(startedList);
+            return started
+                .flatMap(startedVal -> startedVal.started().close())
+                .then(started
+                    .flatMap(startedVal -> startedVal
+                        .started()
+                        .onClose()
+                        .doOnTerminate(
+                            () -> endpointSupport.stopSuceeded(startedVal.name())))
+                    .then())
+                .doOnTerminate(endpointSupport::stopCompleted);
+          });
     }
 
     public Mono<Void> onStop() {
       return started
-          .flatMap(closeableList ->
-              Flux.fromIterable(closeableList)
-                  .flatMap(Closeable::onClose)
+          .flatMap(startedList ->
+              Flux.fromIterable(startedList)
+                  .flatMap(startedVal -> startedVal.started().onClose())
                   .then());
+    }
+  }
+
+  static class NamedStart {
+
+    private final Mono<Closeable> serverStart;
+    private final String name;
+
+    public NamedStart(String name,
+        Mono<Closeable> serverStart) {
+      this.name = name;
+      this.serverStart = serverStart;
+    }
+
+    public Mono<Closeable> serverStart() {
+      return serverStart;
+    }
+
+    public String name() {
+      return name;
+    }
+  }
+
+  static class NamedStarted {
+
+    private final String name;
+    private final Closeable started;
+
+    public NamedStarted(String name,
+        Closeable started) {
+      this.name = name;
+      this.started = started;
+    }
+
+    public Closeable started() {
+      return started;
+    }
+
+    public String name() {
+      return name;
     }
   }
 
@@ -211,7 +280,8 @@ class ServersLifecycle implements SmartLifecycle {
     }
 
     public ServersLifecycle build(R2DefaultProperties defProps,
-        List<R2Properties> props) {
+        List<R2Properties> props,
+        EndpointSupport endpointSupport) {
 
       Resolved<Set<String>, Set<R2Properties>> resolvedProps =
           propsResolver
@@ -224,7 +294,9 @@ class ServersLifecycle implements SmartLifecycle {
       Set<R2Properties> serverProps = resolvedProps.succ();
       Set<ServerConfig> serverConfigs = configResolver.resolve(serverProps);
 
-      return new ServersLifecycle(serverConfigs);
+      return new ServersLifecycle(
+          serverConfigs,
+          endpointSupport);
     }
   }
 }

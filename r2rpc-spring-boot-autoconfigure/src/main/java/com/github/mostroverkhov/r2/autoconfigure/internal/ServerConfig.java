@@ -11,19 +11,26 @@ import java.util.function.Function;
 
 class ServerConfig {
 
+  private final String name;
   private final ServerRSocketFactory rSocketFactory;
   private final ServerTransport<Closeable> transport;
   private final List<DataCodec> codecs;
   private final Function<ConnectionContext, Collection<Object>> handlers;
 
-  public ServerConfig(ServerRSocketFactory rSocketFactory,
+  public ServerConfig(String name,
+      ServerRSocketFactory rSocketFactory,
       ServerTransport<Closeable> transport,
       List<DataCodec> codecs,
       Function<ConnectionContext, Collection<Object>> handlers) {
+    this.name = name;
     this.rSocketFactory = rSocketFactory;
     this.transport = transport;
     this.codecs = codecs;
     this.handlers = handlers;
+  }
+
+  public String getName() {
+    return name;
   }
 
   public ServerRSocketFactory rSocketFactory() {
