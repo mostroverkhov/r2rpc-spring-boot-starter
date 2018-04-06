@@ -1,5 +1,6 @@
 package com.github.mostroverkhov.r2.example;
 
+import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.requester.RequesterFactory;
 import com.github.mostroverkhov.r2.example.api.BarApiProvider;
@@ -10,10 +11,10 @@ import com.github.mostroverkhov.r2.example.api.baz.BazContract;
 import com.github.mostroverkhov.r2.java.R2Client;
 import io.rsocket.RSocketFactory.ClientRSocketFactory;
 import io.rsocket.transport.netty.client.TcpClientTransport;
-import java.time.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,6 +28,13 @@ public class R2rpcStarterExampleApplication {
 
   private static final Logger logger = LoggerFactory
       .getLogger(R2rpcStarterExampleApplication.class);
+
+  private final ServerControls serverControls;
+
+  @Autowired
+  public R2rpcStarterExampleApplication(ServerControls serverControls) {
+    this.serverControls = serverControls;
+  }
 
   public static void main(String[] args) {
     SpringApplication.run(R2rpcStarterExampleApplication.class, args);
@@ -55,7 +63,12 @@ public class R2rpcStarterExampleApplication {
         .connectWith(new ClientRSocketFactory())
         .transport(TcpClientTransport.create(8083))
         .start()
-        .delaySubscription(Duration.ofSeconds(1))
+        .delaySubscription(
+            serverControls
+                .endpoint("foo")
+                .started()
+                .doOnError(err -> logger.error("Server failed to start", err))
+                .onErrorResume(err -> Mono.never()))
         .cache();
 
     Mono<BazContract> bazContract = requesterFactory
@@ -73,9 +86,9 @@ public class R2rpcStarterExampleApplication {
                     BarAndBaz::new)
             ))
         .subscribe(
-            baz -> logger.debug("Got BarBuz response: " + baz),
-            err -> logger.error("BarBuz error: ", err),
-            () -> logger.debug("BarBuz completed"));
+            baz -> logger.debug("Got BarBaz response: " + baz),
+            err -> logger.error("BarBaz error: ", err),
+            () -> logger.debug("BarBaz completed"));
   }
 
   @NotNull

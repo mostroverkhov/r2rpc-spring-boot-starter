@@ -15,12 +15,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
-    <spring-boot.version>2.0.0.RELEASE</spring-boot.version>
+    <spring-boot.version>2.0.1.RELEASE</spring-boot.version>
     <r2rpc.version>0.2.0</r2rpc.version>
-    <reactor-core.version>3.1.5.RELEASE</reactor-core.version>
     <r2rpc.codec.jackson.version>0.2.0</r2rpc.codec.jackson.version>
     <rsocket.transport.netty.version>0.9.16</rsocket.transport.netty.version>
-    <reactortest.version>3.1.2.RELEASE</reactortest.version>
   </properties>
 
   <modules>
@@ -44,11 +42,6 @@
         <version>${r2rpc.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.projectreactor</groupId>
-        <artifactId>reactor-core</artifactId>
-        <version>${reactor-core.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.github.mostroverkhov.r2</groupId>
         <artifactId>codec-jackson</artifactId>
         <version>${r2rpc.codec.jackson.version}</version>
@@ -63,12 +56,6 @@
         <artifactId>spring-boot-test</artifactId>
         <version>${spring-boot.version}</version>
       </dependency>
-      <dependency>
-        <groupId>io.projectreactor</groupId>
-        <artifactId>reactor-test</artifactId>
-        <version>${reactortest.version}</version>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
 

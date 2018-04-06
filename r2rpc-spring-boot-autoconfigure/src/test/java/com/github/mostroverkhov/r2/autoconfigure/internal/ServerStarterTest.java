@@ -1,10 +1,20 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toSet;
+
+import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.NamedStart;
 import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.ServersStarter;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointSupport;
 import io.rsocket.Closeable;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -23,62 +33,141 @@ public class ServerStarterTest {
 
   @Test
   public void startsSuccessfully() {
-    ServersStarter starter = new ServersStarter(starts());
+    EndpointSupport endpointSupport = new EndpointSupport();
+    ServersStarter starter = new ServersStarter(endpointSupport, starts());
     StepVerifier.create(starter.start()
         .flatMapIterable(l -> l))
         .expectNextCount(5)
         .expectComplete()
         .verify(Duration.ofSeconds(10));
+
+    StepVerifier.create(
+        endpointSupport.starts().collectList())
+        .expectNextMatches(list ->
+            contains(
+                list,
+                asList("0", "1", "2", "3", "4"),
+                emptyList()))
+        .expectComplete()
+        .verify(Duration.ofSeconds(1));
   }
 
   @Test
   public void startsPartialSuccessfully() {
-    StepVerifier.create(new ServersStarter(startsWithError())
+    EndpointSupport endpointSupport = new EndpointSupport();
+    ServersStarter starter = new ServersStarter(endpointSupport, startsWithError());
+    StepVerifier.create(starter
         .start()
         .flatMapIterable(l -> l))
         .expectNextCount(4)
         .expectComplete()
         .verify(Duration.ofSeconds(10));
+
+    StepVerifier.create(
+        endpointSupport.starts().collectList())
+        .expectNextMatches(list ->
+            contains(
+                list,
+                asList("0", "1", "2", "3"),
+                singletonList("4")))
+        .expectComplete()
+        .verify(Duration.ofSeconds(1));
   }
 
   @Test
-  public void closesSucessfully() {
-    ServersStarter starter = new ServersStarter(starts());
+  public void closesSuccessfully() {
+    EndpointSupport endpointSupport = new EndpointSupport();
+    ServersStarter starter = new ServersStarter(endpointSupport, starts());
     StepVerifier.create(starter
         .start()
         .then(starter.stop())
         .then(starter.onStop()))
         .expectComplete()
         .verify(Duration.ofSeconds(10));
+
+    StepVerifier.create(
+        endpointSupport.stops().collectList())
+        .expectNextMatches(list ->
+            contains(
+                list,
+                asList("0", "1", "2", "3", "4"),
+                emptyList()))
+        .expectComplete()
+        .verify(Duration.ofSeconds(1));
+
   }
 
   @Test
   public void closesPartialSucessfully() {
-    ServersStarter starter = new ServersStarter(startsWithError());
+    EndpointSupport endpointSupport = new EndpointSupport();
+    ServersStarter starter = new ServersStarter(endpointSupport, startsWithError());
     StepVerifier.create(starter.start()
         .then(starter.stop()).then(starter.onStop()))
         .expectComplete()
         .verify(Duration.ofSeconds(10));
+
+    StepVerifier.create(
+        endpointSupport.stops().collectList())
+        .expectNextMatches(list ->
+            contains(
+                list,
+                asList("0", "1", "2", "3"),
+                emptyList()))
+        .expectComplete()
+        .verify(Duration.ofSeconds(1));
+
   }
 
-  private List<Mono<Closeable>> startsWithError() {
+  private static boolean contains(
+      List<EndpointResult> endpointResults,
+      List<String> succNames,
+      List<String> errNames) {
+
+    return
+        contains(
+            endpointResults,
+            succNames,
+            endpointResult -> !endpointResult.isError())
+            &&
+            contains(
+                endpointResults,
+                errNames,
+                EndpointResult::isError);
+  }
+
+  private static boolean contains(List<EndpointResult> endpointResults,
+      List<String> names,
+      Predicate<EndpointResult> pred) {
+
+    Set<String> resultNames = endpointResults
+        .stream()
+        .filter(pred)
+        .map(EndpointResult::getName)
+        .collect(toSet());
+
+    return resultNames.size() == names.size()
+        && resultNames.containsAll(names);
+  }
+
+  private List<NamedStart> startsWithError() {
     return Flux.range(0, 5)
         .map(v -> {
+          String val = String.valueOf(v);
           if (v == 4) {
-            return factory.error();
+            return factory.error(val);
           } else {
-            return factory.create();
+            return factory.create(val);
           }
         })
         .collectList()
         .block();
   }
 
-  private List<Mono<Closeable>> starts() {
+  private List<NamedStart> starts() {
     return Flux.range(0, 5)
-          .map(v -> factory.create())
-          .collectList()
-          .block();
+        .map(v -> factory.create(String.valueOf(v)))
+        .collectList()
+        .block();
   }
 
   static class CloseableFactory {
@@ -94,14 +183,16 @@ public class ServerStarterTest {
       this.closeDelayMillis = closeDelayMillis;
     }
 
-    public Mono<Closeable> create() {
-      return Mono.delay(Duration.ofMillis(monoDelayMillis))
+    public NamedStart create(String name) {
+      Mono<Closeable> closeable = Mono.delay(Duration.ofMillis(monoDelayMillis))
           .map(l -> new MockCloseable(closeDelayMillis));
+      return new NamedStart(name, closeable);
     }
 
-    public Mono<Closeable> error() {
-      return Mono.delay(Duration.ofMillis(monoDelayMillis))
+    public NamedStart error(String name) {
+      Mono<Closeable> err = Mono.delay(Duration.ofMillis(monoDelayMillis))
           .flatMap(l -> Mono.error(new Throwable("err")));
+      return new NamedStart(name, err);
     }
 
   }
