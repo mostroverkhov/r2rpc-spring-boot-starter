@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.autoconfigure;
+package com.github.mostroverkhov.r2.autoconfigure.server;
 
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import java.util.function.Function;

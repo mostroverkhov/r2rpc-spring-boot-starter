@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.autoconfigure;
+package com.github.mostroverkhov.r2.autoconfigure.server;
 
 import io.rsocket.Closeable;
 import io.rsocket.transport.ServerTransport;

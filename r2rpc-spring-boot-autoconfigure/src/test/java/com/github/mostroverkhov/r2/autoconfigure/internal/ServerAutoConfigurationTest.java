@@ -4,7 +4,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerTransportFactory;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.netty.NettyDuplexConnection;

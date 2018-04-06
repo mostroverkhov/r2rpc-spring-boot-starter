@@ -1,7 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.resolvers;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerApiProvider;
 import com.github.mostroverkhov.r2.core.contract.RequestStream;
 import com.github.mostroverkhov.r2.core.contract.Service;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;

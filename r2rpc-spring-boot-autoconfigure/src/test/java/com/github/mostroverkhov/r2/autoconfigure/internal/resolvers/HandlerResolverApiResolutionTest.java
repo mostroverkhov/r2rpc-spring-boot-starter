@@ -3,7 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.resolvers;
 import static com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.ValidApiProvider;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.AnotherContract;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.AnotherValidApi;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlerResolverApiResolutionFixtures.AnotherValidApiProvider;

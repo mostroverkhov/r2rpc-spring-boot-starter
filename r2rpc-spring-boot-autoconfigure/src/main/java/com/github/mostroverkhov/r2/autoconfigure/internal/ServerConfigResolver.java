@@ -3,7 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toSet;
 
-import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerTransportFactory;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.CodecResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlersResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.ServerRSocketFactoryResolver;

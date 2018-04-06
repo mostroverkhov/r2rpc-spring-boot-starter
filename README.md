@@ -51,10 +51,10 @@ API definition is exposed to Spring with `ServerApiProvider<ExampleApiImpl>` imp
 where `ExampleApiImpl` is implementation of `ExampleApi` providing handlers for incoming 
 requests.
 ```java
-public class BarApiProvider implements ServerApiProvider<BarApiImpl> {
+public class ExampleApiProvider implements ServerApiProvider<ExampleApiImpl> {
 
   @Override
-  public BarApiImpl apply(ConnectionContext connectionContext) {
+  public ExampleApiImpl apply(ConnectionContext connectionContext) {
     return new BarApiImpl();
   }
 }
@@ -65,6 +65,15 @@ override name on implementation itself by annotating It with `@R2API(newName)`
 * API implementation (handler) must implement at most 1 (one) API definition
 * API implementations per endpoint must contribute API definitions of unique type 
   (in other words, no more than one implementation of particular API per endpoint)
+
+Endpoints lifecycle is available with `ServerControls.endpoint(name)` API, which allows to listen for 
+endpoint Start and Stop events (success or error), e.g.
+
+```java
+            Mono<Endpoint> endpointStart = serverControls
+                .endpoint("foo")
+                .started()
+```  
 
 ### Examples
 

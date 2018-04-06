@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerApiProvider;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

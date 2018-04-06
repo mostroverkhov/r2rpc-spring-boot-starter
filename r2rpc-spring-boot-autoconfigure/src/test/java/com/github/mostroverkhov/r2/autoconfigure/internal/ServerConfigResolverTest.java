@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
-import com.github.mostroverkhov.r2.autoconfigure.ServerApiProvider;
-import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransport;
-import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerTransportFactory;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.Metadata.Builder;
