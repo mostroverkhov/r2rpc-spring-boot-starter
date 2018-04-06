@@ -1,7 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
-import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointSupport;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.responder.Codecs;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;

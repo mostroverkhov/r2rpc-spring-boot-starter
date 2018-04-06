@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.R2ServerTransport;
 import com.github.mostroverkhov.r2.autoconfigure.ServerTransportFactory;
-import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointSupport;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.DataCodec;

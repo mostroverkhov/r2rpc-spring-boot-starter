@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
+package com.github.mostroverkhov.r2.autoconfigure.internal.endpoints;
 
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;

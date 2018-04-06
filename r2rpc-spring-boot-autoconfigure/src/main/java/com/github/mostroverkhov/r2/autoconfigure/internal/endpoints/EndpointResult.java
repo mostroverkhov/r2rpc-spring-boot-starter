@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
+package com.github.mostroverkhov.r2.autoconfigure.internal.endpoints;
 
 import java.util.Objects;
 
@@ -13,11 +13,11 @@ public class EndpointResult {
     this.error = error;
   }
 
-  static EndpointResult success(String name) {
+  public static EndpointResult success(String name) {
     return new EndpointResult(name, null);
   }
 
-  static EndpointResult error(String name, Throwable error) {
+  public static EndpointResult error(String name, Throwable error) {
     Objects.requireNonNull(error);
     return new EndpointResult(name, error);
   }

@@ -4,7 +4,7 @@ public class MissingEndpointException extends RuntimeException {
 
   private String endpointName;
 
-  MissingEndpointException() {
+  public MissingEndpointException() {
   }
 
   public MissingEndpointException(

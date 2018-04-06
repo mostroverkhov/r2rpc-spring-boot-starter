@@ -1,5 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointSupport;
 import java.time.Duration;
 import java.util.function.Predicate;
 import org.jetbrains.annotations.NotNull;

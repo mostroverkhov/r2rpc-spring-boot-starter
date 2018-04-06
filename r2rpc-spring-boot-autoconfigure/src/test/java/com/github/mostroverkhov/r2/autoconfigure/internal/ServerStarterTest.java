@@ -7,8 +7,8 @@ import static java.util.stream.Collectors.toSet;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.NamedStart;
 import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.ServersStarter;
-import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointResult;
-import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointSupport;
 import io.rsocket.Closeable;
 import java.time.Duration;
 import java.util.List;

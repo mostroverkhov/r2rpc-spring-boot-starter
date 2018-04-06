@@ -1,5 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

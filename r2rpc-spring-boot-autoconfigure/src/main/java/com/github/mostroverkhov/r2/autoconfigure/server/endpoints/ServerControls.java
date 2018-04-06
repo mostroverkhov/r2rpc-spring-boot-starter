@@ -1,5 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
 import java.util.Objects;
 import reactor.core.publisher.Flux;
 

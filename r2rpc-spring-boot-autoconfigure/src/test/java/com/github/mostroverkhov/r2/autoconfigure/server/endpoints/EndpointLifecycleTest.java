@@ -1,8 +1,9 @@
 package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
-import static com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointResult.error;
-import static com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointResult.success;
+import static com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult.error;
+import static com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult.success;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
 import java.time.Duration;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
