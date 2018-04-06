@@ -2,7 +2,7 @@ package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
 import java.util.Objects;
 
-final class EndpointResult {
+public class EndpointResult {
 
   private final String name;
   private final Throwable error;
@@ -22,7 +22,7 @@ final class EndpointResult {
     return new EndpointResult(name, error);
   }
 
-  boolean isError() {
+  public boolean isError() {
     return error != null;
   }
 
@@ -32,5 +32,32 @@ final class EndpointResult {
 
   public Throwable getError() {
     return error;
+  }
+
+  @Override
+  public String toString() {
+    return "EndpointResult{" +
+        "name='" + name + '\'' +
+        ", error=" + error +
+        '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    EndpointResult that = (EndpointResult) o;
+    return Objects.equals(name, that.name) &&
+        Objects.equals(error, that.error);
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(name, error);
   }
 }

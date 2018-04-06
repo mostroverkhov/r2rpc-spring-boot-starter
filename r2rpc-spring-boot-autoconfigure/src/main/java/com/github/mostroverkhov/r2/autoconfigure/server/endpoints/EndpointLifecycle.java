@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-class EndpointLifecycle {
+public class EndpointLifecycle {
 
   private final String name;
   private final Flux<EndpointResult> startSignals;
