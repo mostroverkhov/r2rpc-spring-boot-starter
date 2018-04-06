@@ -1,5 +1,7 @@
 # R2RPC Spring Boot Starter
 
+[![Build Status](https://travis-ci.org/mostroverkhov/r2rpc-spring-boot-starter.svg?branch=master)](https://travis-ci.org/mostroverkhov/r2rpc-spring-boot-starter)
+
 Spring Boot 2 starter for [R2RPC](https://github.com/mostroverkhov/r2) - [RSocket](https://github.com/rsocket/rsocket) based RPC framework with pluggable serialization.
 
 Simplifies creation of `R2RPC` servers by providing:
