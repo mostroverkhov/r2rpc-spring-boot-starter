@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.autoconfigure.server.controls;
+package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
 import java.util.Objects;
 
@@ -6,7 +6,7 @@ public class Endpoint {
 
   private final String name;
 
-  public Endpoint(String name) {
+  Endpoint(String name) {
     Objects.requireNonNull(name);
     this.name = name;
   }

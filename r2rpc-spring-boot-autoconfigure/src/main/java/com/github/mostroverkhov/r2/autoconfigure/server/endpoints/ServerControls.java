@@ -1,16 +1,16 @@
-package com.github.mostroverkhov.r2.autoconfigure.server.controls;
+package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
 import java.util.Objects;
 import reactor.core.publisher.Flux;
 
 public class ServerControls {
 
-  private final Flux<EndpointStartResult> endpointStarts;
-  private final Flux<EndpointStartResult> endpointStops;
+  private final Flux<EndpointResult> endpointStarts;
+  private final Flux<EndpointResult> endpointStops;
 
   public ServerControls(
-      Flux<EndpointStartResult> endpointStarts,
-      Flux<EndpointStartResult> endpointStops) {
+      Flux<EndpointResult> endpointStarts,
+      Flux<EndpointResult> endpointStops) {
     Objects.requireNonNull(endpointStarts);
     Objects.requireNonNull(endpointStops);
     this.endpointStarts = endpointStarts;

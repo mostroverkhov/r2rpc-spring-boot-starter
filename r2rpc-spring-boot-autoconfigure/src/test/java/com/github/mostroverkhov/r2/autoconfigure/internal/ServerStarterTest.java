@@ -2,7 +2,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.NamedStart;
 import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.ServersStarter;
-import com.github.mostroverkhov.r2.autoconfigure.server.controls.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointSupport;
 import io.rsocket.Closeable;
 import java.time.Duration;
 import java.util.List;

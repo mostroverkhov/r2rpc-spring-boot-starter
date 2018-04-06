@@ -1,7 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
-import com.github.mostroverkhov.r2.autoconfigure.server.controls.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.EndpointSupport;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.responder.Codecs;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
@@ -210,7 +210,7 @@ class ServersLifecycle implements SmartLifecycle {
                         .started()
                         .onClose()
                         .doOnTerminate(
-                            () -> endpointSupport.stopSuceeded(startedVal.name())))
+                            () -> endpointSupport.stopSucceeded(startedVal.name())))
                     .then())
                 .doOnTerminate(endpointSupport::stopCompleted);
           });

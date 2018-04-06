@@ -1,19 +1,19 @@
-package com.github.mostroverkhov.r2.autoconfigure.server.controls;
+package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class EndpointLifecycle {
+class EndpointLifecycle {
 
   private final String name;
-  private final Flux<EndpointStartResult> startSignals;
-  private final Flux<EndpointStartResult> stopSignals;
+  private final Flux<EndpointResult> startSignals;
+  private final Flux<EndpointResult> stopSignals;
 
   EndpointLifecycle(
       String name,
-      Flux<EndpointStartResult> startSignals,
-      Flux<EndpointStartResult> stopSignals) {
+      Flux<EndpointResult> startSignals,
+      Flux<EndpointResult> stopSignals) {
     this.name = name;
     this.startSignals = startSignals;
     this.stopSignals = stopSignals;
@@ -28,7 +28,7 @@ public class EndpointLifecycle {
   }
 
   @NotNull
-  private Mono<Endpoint> endpointFrom(Flux<EndpointStartResult> startSignals) {
+  private Mono<Endpoint> endpointFrom(Flux<EndpointResult> startSignals) {
     return startSignals
         .filter(result ->
             name.equals(

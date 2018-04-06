@@ -1,6 +1,6 @@
 package com.github.mostroverkhov.r2.example;
 
-import com.github.mostroverkhov.r2.autoconfigure.server.controls.ServerControls;
+import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.requester.RequesterFactory;
 import com.github.mostroverkhov.r2.example.api.BarApiProvider;

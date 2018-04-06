@@ -1,4 +1,4 @@
-package com.github.mostroverkhov.r2.autoconfigure.server.controls;
+package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
 public class MissingEndpointException extends RuntimeException {
 
