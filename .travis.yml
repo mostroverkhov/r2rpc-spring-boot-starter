@@ -1,0 +1,19 @@
+language: java
+jdk:
+- oraclejdk8
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+dist: trusty
+
+sudo: false
+
+install: true
+script: ./mvnw clean install
+
+cache:
+  directories:
+  - $HOME/.m2
