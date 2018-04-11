@@ -1,16 +1,15 @@
 package com.github.mostroverkhov.r2.example;
 
+import com.github.mostroverkhov.r2.autoconfigure.client.ApiRequesterFactory;
+import com.github.mostroverkhov.r2.autoconfigure.internal.client.ClientConnectors;
+import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.Endpoint;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
-import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
-import com.github.mostroverkhov.r2.core.requester.RequesterFactory;
-import com.github.mostroverkhov.r2.example.api.BarApiProvider;
-import com.github.mostroverkhov.r2.example.api.bar.Bar;
-import com.github.mostroverkhov.r2.example.api.bar.BarContract;
-import com.github.mostroverkhov.r2.example.api.baz.Baz;
-import com.github.mostroverkhov.r2.example.api.baz.BazContract;
-import com.github.mostroverkhov.r2.java.R2Client;
-import io.rsocket.RSocketFactory.ClientRSocketFactory;
-import io.rsocket.transport.netty.client.TcpClientTransport;
+import com.github.mostroverkhov.r2.example.api.*;
+import com.github.mostroverkhov.r2.example.client.BarBazRequesterApiProvider;
+import com.github.mostroverkhov.r2.example.server.BazServerApiProvider;
+import com.github.mostroverkhov.r2.example.server.BarServerApiProvider;
+import com.github.mostroverkhov.r2.example.svc.Bar;
+import com.github.mostroverkhov.r2.example.svc.Baz;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,76 +18,75 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @SpringBootApplication
 public class R2rpcStarterExampleApplication {
-
   private static final Logger logger = LoggerFactory
       .getLogger(R2rpcStarterExampleApplication.class);
 
-  private final ServerControls serverControls;
-
   @Autowired
-  public R2rpcStarterExampleApplication(ServerControls serverControls) {
-    this.serverControls = serverControls;
-  }
+  private ClientConnectors clientConnectors;
+  @Autowired
+  private ServerControls serverControls;
 
   public static void main(String[] args) {
     SpringApplication.run(R2rpcStarterExampleApplication.class, args);
   }
-
+  /*baz API handlers*/
   @Bean
-  public BazApiProvider bazApi() {
-    return new BazApiProvider();
+  public BazServerApiProvider bazApi() {
+    return new BazServerApiProvider();
+  }
+  /*bar API handlers*/
+  @Bean
+  public BarServerApiProvider barApi() {
+    return new BarServerApiProvider();
+  }
+  /*hint used by R2RPC autoconfiguration to find APIs. In this case,
+  * BarBazApiToken location determines APIs package*/
+  @Bean
+  BarBazRequesterApiProvider clientApiProvider() {
+    return new BarBazRequesterApiProvider();
   }
 
   @Bean
-  public BarApiProvider barApi() {
-    return new BarApiProvider();
-  }
+  public CommandLineRunner r2ConnectorsClient() {
+    return args -> {
 
-  @Bean
-  public CommandLineRunner runner() {
-    return this::simpleR2Client;
-  }
+      Mono<Endpoint> untilServerStarted =
+          serverControls
+          .endpoint("foo")
+          .started()
+          .doOnError(err -> logger.error("Server failed to start", err))
+          .onErrorResume(err -> Mono.never());
 
-  @NotNull
-  private Disposable simpleR2Client(String... args) {
-    Mono<RequesterFactory> requesterFactory = new R2Client()
-        .configureRequester(b ->
-            b.codec(new JacksonJsonDataCodec()))
-        .connectWith(new ClientRSocketFactory())
-        .transport(TcpClientTransport.create(8083))
-        .start()
-        .delaySubscription(
-            serverControls
-                .endpoint("foo")
-                .started()
-                .doOnError(err -> logger.error("Server failed to start", err))
-                .onErrorResume(err -> Mono.never()))
-        .cache();
+      Mono<ApiRequesterFactory> apiFactory =
+          clientConnectors
+          .name("foo")
+          .connect("localhost", 8083)
+          .delaySubscription(untilServerStarted)
+          .cache();
 
-    Mono<BazContract> bazContract = requesterFactory
-        .map(req -> req.create(BazContract.class));
+      Mono<BazApi> bazApiMono = apiFactory
+          .map(af -> af.create(BazApi.class));
+      Mono<BarApi> barApiMono = apiFactory
+          .map(af -> af.create(BarApi.class));
 
-    Mono<BarContract> barContract = requesterFactory
-        .map(req -> req.create(BarContract.class));
-
-    return barContract
-        .flatMapMany(barSvc ->
-            bazContract.flatMapMany(bazSvc ->
-                Flux.combineLatest(
-                    barSvc.bar(newBar()),
-                    bazSvc.baz(newBaz()),
-                    BarAndBaz::new)
-            ))
-        .subscribe(
-            baz -> logger.debug("Got BarBaz response: " + baz),
-            err -> logger.error("BarBaz error: ", err),
-            () -> logger.debug("BarBaz completed"));
+      barApiMono
+          .flatMapMany(barApi ->
+              bazApiMono.flatMapMany(bazApi ->
+                  Flux.combineLatest(
+                      barApi.barContract().bar(newBar()),
+                      bazApi.bazContract().baz(newBaz()),
+                      BarAndBaz::new)
+              ))
+          .subscribe(
+              baz -> logger.debug("Got BarBaz response: " + baz),
+              err -> logger.error("BarBaz error: ", err),
+              () -> logger.debug("BarBaz completed"));
+    };
   }
 
   @NotNull

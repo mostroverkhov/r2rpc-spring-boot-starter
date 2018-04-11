@@ -2,14 +2,12 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import java.util.List;
 
-public class R2Properties {
-
-  private String name;
-  private String transport;
-  private int port;
-  private List<String> codecs;
-  private List<String> api;
-  private boolean enabled = true;
+public abstract class R2Properties {
+  protected String name;
+  protected String transport;
+  protected List<String> codecs;
+  protected List<String> api;
+  protected boolean enabled = true;
 
   public String getName() {
     return name;
@@ -25,14 +23,6 @@ public class R2Properties {
 
   public void setTransport(String transport) {
     this.transport = transport;
-  }
-
-  public int getPort() {
-    return port;
-  }
-
-  public void setPort(int port) {
-    this.port = port;
   }
 
   public List<String> getCodecs() {
@@ -57,28 +47,5 @@ public class R2Properties {
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
-  }
-
-  R2Properties copy() {
-    R2Properties r2Properties = new R2Properties();
-    r2Properties.setPort(port);
-    r2Properties.setTransport(transport);
-    r2Properties.setApi(api);
-    r2Properties.setCodecs(codecs);
-    r2Properties.setName(name);
-    r2Properties.setEnabled(enabled);
-    return r2Properties;
-  }
-
-  @Override
-  public String toString() {
-    return "R2Properties{" +
-        "name='" + name + '\'' +
-        ", transport='" + transport + '\'' +
-        ", port=" + port +
-        ", codecs=" + codecs +
-        ", api='" + api + '\'' +
-        ", enabled=" + enabled +
-        '}';
   }
 }
