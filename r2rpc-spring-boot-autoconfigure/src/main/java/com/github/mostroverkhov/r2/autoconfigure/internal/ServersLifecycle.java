@@ -10,14 +10,6 @@ import com.github.mostroverkhov.r2.java.R2Server;
 import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.ServerTransport;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
@@ -26,6 +18,16 @@ import org.springframework.core.NestedExceptionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.toList;
 
 class ServersLifecycle implements SmartLifecycle {
 
@@ -87,7 +89,7 @@ class ServersLifecycle implements SmartLifecycle {
   private List<NamedStart> serverStarts(Set<ServerConfig> serverConfigs) {
     return serverConfigs.stream()
         .map(this::serverStart)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private NamedStart serverStart(ServerConfig serverConfig) {
@@ -153,9 +155,11 @@ class ServersLifecycle implements SmartLifecycle {
   }
 
   private void logServerStarting(Set<ServerConfig> configs) {
+    List<String> endpointNames = configs.stream()
+            .map(ServerConfig::getName)
+            .collect(toList());
     logger.debug(String
-        .format("Starting R2 Servers with %d endpoints",
-            configs.size()));
+        .format("Starting R2 Servers. Endpoints: %s",endpointNames));
   }
 
   private void logServersStarted(List<Closeable> closeables) {

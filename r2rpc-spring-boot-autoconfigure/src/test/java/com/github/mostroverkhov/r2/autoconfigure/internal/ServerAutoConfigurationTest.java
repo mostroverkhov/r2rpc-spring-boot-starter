@@ -21,6 +21,8 @@ public class ServerAutoConfigurationTest {
   public void defaultBeans() {
     contextRunner.run(ctx -> {
       assertThat(ctx).hasSingleBean(ServerRSocketFactory.class);
+      String beanName = ctx.getBeanNamesForType(ServerRSocketFactory.class)[0];
+      assertThat(ctx.isPrototype(beanName)).isTrue();
       assertThat(ctx).hasSingleBean(ServersLifecycle.class);
       assertThat(ctx).hasSingleBean(JacksonJsonDataCodec.class);
       assertThat(ctx).hasSingleBean(ServerTransportFactory.class);

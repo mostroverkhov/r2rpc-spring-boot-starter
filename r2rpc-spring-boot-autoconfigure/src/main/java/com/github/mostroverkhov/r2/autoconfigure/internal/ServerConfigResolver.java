@@ -3,11 +3,8 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toSet;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.*;
 import com.github.mostroverkhov.r2.autoconfigure.server.ServerTransportFactory;
-import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.CodecResolver;
-import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.HandlersResolver;
-import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.ServerRSocketFactoryResolver;
-import com.github.mostroverkhov.r2.autoconfigure.internal.resolvers.TransportResolver;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import io.rsocket.Closeable;
@@ -21,7 +18,7 @@ import java.util.function.Function;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
-class ServerConfigResolver {
+class ServerConfigResolver implements Resolver<Set<R2Properties>, Set<ServerConfig>> {
 
   private final TransportResolver transportResolver;
   private final CodecResolver codecResolver;
@@ -39,11 +36,12 @@ class ServerConfigResolver {
     R2BeanLocator beanLocator = new R2BeanLocator(c);
     this.transportResolver = new TransportResolver(beanLocator);
     this.codecResolver = new CodecResolver(beanLocator);
-    this.serverRSocketFactoryResolver = new ServerRSocketFactoryResolver(c);
+    this.serverRSocketFactoryResolver = new ServerRSocketFactoryResolver();
     this.handlersResolver = new HandlersResolver(c);
     this.ctx = c;
   }
 
+  @Override
   public Set<ServerConfig> resolve(Set<R2Properties> r2Properties) {
     return r2Properties
         .stream()
