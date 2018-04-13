@@ -1,26 +1,27 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toSet;
-
-import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.NamedStart;
-import com.github.mostroverkhov.r2.autoconfigure.internal.ServersLifecycle.ServersStarter;
-import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
-import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointSupport;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.R2ServersLifecycle.NamedStart;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.R2ServersLifecycle.ServersStarter;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointResult;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointSupport;
 import io.rsocket.Closeable;
-import java.time.Duration;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.test.StepVerifier;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toSet;
 
 public class ServerStarterTest {
 

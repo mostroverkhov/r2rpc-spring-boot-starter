@@ -3,7 +3,6 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "r2rpc.server.defaults")
 public class R2DefaultProperties {
 
   private List<String> codecs;

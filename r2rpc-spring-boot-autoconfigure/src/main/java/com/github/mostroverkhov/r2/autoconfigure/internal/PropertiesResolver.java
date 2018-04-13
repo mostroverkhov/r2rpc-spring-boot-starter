@@ -1,105 +1,159 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PropertiesResolver {
+import java.util.*;
+import java.util.function.Function;
 
-  private static final Logger logger = LoggerFactory.getLogger(PropertiesResolver.class);
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
-  private final R2DefaultProperties fallbackServerProps;
+public abstract class PropertiesResolver<T extends R2Properties>
+    implements Verifications<T> {
+  private static final Logger logger = LoggerFactory
+      .getLogger(PropertiesResolver.class);
 
-  public PropertiesResolver(R2DefaultProperties fallbackServerProps) {
-    Objects.requireNonNull(fallbackServerProps);
-    this.fallbackServerProps = fallbackServerProps;
+  private final R2DefaultProperties fallbackProps;
+  private final List<Function<T, Optional<String>>> verif = new ArrayList<>();
+
+  public PropertiesResolver(R2DefaultProperties fallbackProps) {
+    Objects.requireNonNull(fallbackProps);
+    this.fallbackProps = fallbackProps;
+    verifications(this);
   }
 
-  public Resolved<Set<String>, Set<R2Properties>> resolve(List<R2Properties> props,
-      R2DefaultProperties defProps) {
-
+  public Resolved<Set<T>> resolve(List<T> props, R2DefaultProperties defProps) {
     if (props == null) {
-      logger.debug("Resolving missing R2 Properties with empty Set");
-      return Resolved.newSucc(Collections.emptySet());
+      return resolvedEmptyProps();
     }
-    logger.debug("Resolving R2 Properties " + props);
-    logger.debug("Default R2 Properties " + defProps);
+    R2DefaultProperties defaultProperties = createDefaultProperties(defProps);
+    List<Resolved<T>> allResults = resolveAllProperties(props, defaultProperties);
 
-    R2DefaultProperties resolvedDefProps = resolve(defProps);
-    List<Resolved<String, R2Properties>> resolved = props.stream()
-        .filter(R2Properties::isEnabled)
-        .flatMap(prop -> resolve(prop, resolvedDefProps).stream())
+    List<String> allErrors = allErrors(allResults);
+    if (!allErrors.isEmpty()) {
+      return propertiesResolveError(allErrors);
+    }
+
+    Set<T> allProperties = allProperties(allResults);
+    Set<String> configNames = configNames(allProperties);
+    if (configNames.size() != allProperties.size()) {
+      return nonUniqueNamesError();
+    }
+    return resolvedProperties(allProperties);
+  }
+
+  public abstract void verifications(Verifications<T> verifications);
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void addVerifications(Function<T, Optional<String>>... functions) {
+    verif.addAll(Arrays.asList(functions));
+  }
+
+  private List<String> verifyProps(T props) {
+    return verif
+        .stream()
+        .map(v -> v.apply(props))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .collect(toList());
+  }
 
-    Set<String> errors = resolved.stream()
-        .filter(Resolved::isErr)
-        .map(Resolved::err)
+  @NotNull
+  private Resolved<Set<T>> resolvedProperties(Set<T> allProperties) {
+    logger.debug("Resolving R2 Properties:success " + allProperties);
+    return Resolved.newSucc(allProperties);
+  }
+
+  @NotNull
+  private Resolved<Set<T>> resolvedEmptyProps() {
+    logger.debug("Resolving missing R2 Properties with empty Set");
+    return Resolved.newSucc(Collections.emptySet());
+  }
+
+  @NotNull
+  private Resolved<Set<T>> propertiesResolveError(List<String> resolvedErrors) {
+    logger.debug("Error while resolving R2 Properties " + resolvedErrors);
+    return Resolved.newErr(resolvedErrors);
+  }
+
+  @NotNull
+  private Resolved<Set<T>> nonUniqueNamesError() {
+    logger.debug("R2 Properties error: non-unique names");
+    return Resolved.newErr(
+        Collections.singletonList("Configuration names must be unique"));
+  }
+
+  private Set<String> configNames(Set<T> props) {
+    return props
+        .stream()
+        .map(T::getName)
         .collect(toSet());
-    if (!errors.isEmpty()) {
-      logger.debug("Error while resolving R2 Properties " + errors);
-      return Resolved.newErr(errors);
-    }
+  }
 
-    Set<String> configNames = resolved.stream()
-        .map(r -> r.succ().getName())
-        .collect(toSet());
-    if (configNames.size() != resolved.size()) {
-      logger.debug("Resolving R2 Properties error: non-unique names");
-      return Resolved.newErr(Collections.singleton("Server configuration names should be unique"));
-    }
-
-    Set<R2Properties> serverProps = resolved.stream()
+  private Set<T> allProperties(List<Resolved<T>> resolved) {
+    return resolved
+        .stream()
         .map(Resolved::succ)
         .collect(toSet());
-    logger.debug("Resolving R2 Properties:success " + serverProps);
-    return Resolved.newSucc(serverProps);
   }
 
-  private static List<Resolved<String, R2Properties>> resolve(
-      R2Properties props,
-      R2DefaultProperties defProps) {
+  private List<String> allErrors(List<Resolved<T>> resolved) {
+    return resolved.stream()
+        .filter(Resolved::isErr)
+        .map(Resolved::err)
+        .flatMap(Collection::stream)
+        .collect(toList());
+  }
 
-    List<Resolved<String, R2Properties>> res = new ArrayList<>();
+  private List<Resolved<T>> resolveAllProperties(List<T> props,
+                                                 R2DefaultProperties defaultProperties) {
+    logger.debug("Resolving R2 Properties " + props);
+    return props
+        .stream()
+        .filter(T::isEnabled)
+        .map(prop -> resolve(prop, defaultProperties))
+        .collect(toList());
+  }
 
-    String name = props.getName();
-    if (absent(name) || name.isEmpty()) {
-      res.add(Resolved.newErr("Configuration name must be present"));
+  private Resolved<T> resolve(T props,
+                              R2DefaultProperties defProps) {
+
+    T propsWithDefaults = withDefaults(props, defProps);
+    List<String> errors = verifyProps(propsWithDefaults);
+    if (!errors.isEmpty()) {
+      return Resolved.newErr(errors);
     }
-    int port = props.getPort();
-    if (port <= 0) {
-      res.add(Resolved.newErr(String.format("%s: port must be positive: %d",
-          props.getName(),
-          port)));
-    }
-    if (!res.isEmpty()) {
-      return res;
-    }
+    return
+        Resolved.newSucc(propsWithDefaults);
+  }
+
+  private T withDefaults(T props, R2DefaultProperties defProps) {
     if (absent(props.getCodecs())) {
       props.setCodecs(defProps.getCodecs());
     }
     if (absent(props.getTransport())) {
       props.setTransport(defProps.getTransport());
     }
-    res.add(Resolved.newSucc(props));
-    return res;
+    if (absent(props.getApi())) {
+      props.setApi(Collections.emptyList());
+    }
+    return props;
   }
 
-  private R2DefaultProperties resolve(R2DefaultProperties defProps) {
+  private R2DefaultProperties createDefaultProperties(R2DefaultProperties
+                                                          defProps) {
+    logger.debug("Default R2 Properties " + defProps);
     if (defProps == null) {
       defProps = new R2DefaultProperties();
     }
     if (absent(defProps.getCodecs())) {
-      defProps.setCodecs(fallbackServerProps.getCodecs());
+      defProps.setCodecs(fallbackProps.getCodecs());
     }
     if (absent(defProps.getTransport())) {
-      defProps.setTransport(fallbackServerProps.getTransport());
+      defProps.setTransport(fallbackProps.getTransport());
     }
     return defProps;
   }
@@ -108,25 +162,25 @@ class PropertiesResolver {
     return prop == null;
   }
 
-  static class Resolved<L, R> {
+  public static class Resolved<R> {
 
-    private final L error;
+    private final List<String> error;
     private final R success;
 
-    private Resolved(L error, R success) {
+    private Resolved(List<String> error, R success) {
       this.error = error;
       this.success = success;
     }
 
-    public static <L, R> Resolved<L, R> newSucc(R r) {
-      return new Resolved<>(null, r);
+    public static <R> Resolved<R> newSucc(R success) {
+      return new Resolved<>(null, success);
     }
 
-    public static <L, R> Resolved<L, R> newErr(L l) {
-      return new Resolved<>(l, null);
+    public static <R> Resolved<R> newErr(List<String> errors) {
+      return new Resolved<>(errors, null);
     }
 
-    public L err() {
+    public List<String> err() {
       return error;
     }
 

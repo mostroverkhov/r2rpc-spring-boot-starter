@@ -1,6 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.server.endpoints;
 
-import com.github.mostroverkhov.r2.autoconfigure.internal.endpoints.EndpointResult;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointResult;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -11,7 +11,7 @@ public class EndpointLifecycle {
   private final Flux<EndpointResult> startSignals;
   private final Flux<EndpointResult> stopSignals;
 
-  EndpointLifecycle(
+  public EndpointLifecycle(
       String name,
       Flux<EndpointResult> startSignals,
       Flux<EndpointResult> stopSignals) {
