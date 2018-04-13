@@ -14,13 +14,14 @@ Simplifies creation of `R2RPC` Clients and Servers by providing:
 ```yaml
 r2rpc:
  server:
-  defaults:
-    codecs: [jackson-json]
-    transport: tcp
-  endpoints:
-    - name: foo
-      port: 8083
-      api: [baz, bar]
+  responder:
+    defaults:
+      codecs: [jackson-json]
+      transport: tcp
+    endpoints:
+      - name: foo
+        port: 8083
+        api: [bar, baz]
 ```
 Custom transports can be provided as implementations of `R2ServerTransport`, annotated with `@Name(value)`. Custom codecs - with `2DataCodec` implementations, also annotated with `@Name`.
 
@@ -85,14 +86,14 @@ endpoint Start and Stop events (success or error), e.g.
 
 ```java 
 r2rpc:
-
  client:
-  defaults:
-    codecs: [jackson-json]
-    transport: tcp
-  endpoints:
-    - name: foo
-      api: [bar, baz]
+  requester:
+    defaults:
+      codecs: [jackson-json]
+      transport: tcp
+    endpoints:
+      - name: foo
+        api: [bar, baz]
 ```
 
 For each endpoint auto-configuration creates `R2ClientConnector`, which connects to peer with `connect(address,port)`, returns `ApiRequesterFactory`. `ApiRequesterFactory.create(API.class)` returns implementation (dyn proxy) of API interface.
