@@ -14,6 +14,7 @@ import io.rsocket.transport.netty.server.NettyContextCloseable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(R2RpcProperties.class)
+@ConditionalOnProperty(prefix = "r2rpc.server", name = "enabled", matchIfMissing = true)
 public class R2ServerAutoConfiguration {
   @Autowired
   private R2RpcProperties r2RpcProperties;
