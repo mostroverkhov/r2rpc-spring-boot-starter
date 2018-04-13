@@ -3,6 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.*;
 import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
@@ -23,10 +24,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Configuration
-@EnableConfigurationProperties(R2ServerRootProperties.class)
+@EnableConfigurationProperties(R2RpcProperties.class)
 public class R2ServerAutoConfiguration {
   @Autowired
-  private R2ServerRootProperties r2ServerRootProperties;
+  private R2RpcProperties r2RpcProperties;
 
   @ConditionalOnMissingBean
   @Bean
@@ -54,14 +55,26 @@ public class R2ServerAutoConfiguration {
       Optional<List<R2DataCodec>> dataCodecs,
       Optional<List<R2ServerTransport>> transports,
       ServerRSocketFactory serverRSocketFactory) {
+
+    Optional<ResponderProperties> serverResponder =
+        Optional.of(r2RpcProperties)
+            .map(R2RpcProperties::getServer)
+            .map(PeerProperties::getResponder);
+
+    DefaultProperties defaultProperties = serverResponder
+        .map(ResponderProperties::getDefaults)
+        .orElse(null);
+
+    List<ResponderEndpointProperties> endpoints = serverResponder
+        .map(ResponderProperties::getEndpoints)
+        .orElse(null);
+
     return new R2ServersLifecycle
         .Builder(serverRSocketFactory)
         .apiProviders(apiProviders)
         .dataCodecs(dataCodecs)
         .transports(transports)
-        .build(
-            r2ServerRootProperties.getDefaults(),
-            r2ServerRootProperties.getEndpoints());
+        .build(defaultProperties, endpoints);
   }
 
   @Bean

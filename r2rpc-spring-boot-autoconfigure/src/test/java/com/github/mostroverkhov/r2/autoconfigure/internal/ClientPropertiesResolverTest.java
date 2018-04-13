@@ -1,13 +1,13 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.client.ClientPropertiesResolver;
-import com.github.mostroverkhov.r2.autoconfigure.internal.client.R2ClientProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.RequesterEndpointProperties;
 import org.junit.Before;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ClientPropertiesResolverTest extends PropertiesResolverTest<R2ClientProperties>{
+public class ClientPropertiesResolverTest extends PropertiesResolverTest<RequesterEndpointProperties>{
 
   @Override
   @Before
@@ -17,8 +17,8 @@ public class ClientPropertiesResolverTest extends PropertiesResolverTest<R2Clien
   }
 
   @Override
-  public R2ClientProperties copy(R2ClientProperties props) {
-    R2ClientProperties copy = new R2ClientProperties();
+  public RequesterEndpointProperties copy(RequesterEndpointProperties props) {
+    RequesterEndpointProperties copy = new RequesterEndpointProperties();
     copy.setTransport(props.getTransport());
     copy.setApi(props.getApi());
     copy.setCodecs(props.getCodecs());
@@ -28,8 +28,8 @@ public class ClientPropertiesResolverTest extends PropertiesResolverTest<R2Clien
   }
 
   @Override
-  public R2ClientProperties createProps() {
-    R2ClientProperties mock = new R2ClientProperties();
+  public RequesterEndpointProperties createProps() {
+    RequesterEndpointProperties mock = new RequesterEndpointProperties();
 
     String api = MockProps.api;
     String codec = MockProps.codec;

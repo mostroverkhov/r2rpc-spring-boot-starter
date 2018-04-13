@@ -1,5 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.EndpointProperties;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,25 +12,25 @@ import java.util.function.Function;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public abstract class PropertiesResolver<T extends R2Properties>
+public abstract class PropertiesResolver<T extends EndpointProperties>
     implements Verifications<T> {
   private static final Logger logger = LoggerFactory
       .getLogger(PropertiesResolver.class);
 
-  private final R2DefaultProperties fallbackProps;
+  private final DefaultProperties fallbackProps;
   private final List<Function<T, Optional<String>>> verif = new ArrayList<>();
 
-  public PropertiesResolver(R2DefaultProperties fallbackProps) {
+  public PropertiesResolver(DefaultProperties fallbackProps) {
     Objects.requireNonNull(fallbackProps);
     this.fallbackProps = fallbackProps;
     verifications(this);
   }
 
-  public Resolved<Set<T>> resolve(List<T> props, R2DefaultProperties defProps) {
+  public Resolved<Set<T>> resolve(List<T> props, DefaultProperties defProps) {
     if (props == null) {
       return resolvedEmptyProps();
     }
-    R2DefaultProperties defaultProperties = createDefaultProperties(defProps);
+    DefaultProperties defaultProperties = createDefaultProperties(defProps);
     List<Resolved<T>> allResults = resolveAllProperties(props, defaultProperties);
 
     List<String> allErrors = allErrors(allResults);
@@ -109,7 +111,7 @@ public abstract class PropertiesResolver<T extends R2Properties>
   }
 
   private List<Resolved<T>> resolveAllProperties(List<T> props,
-                                                 R2DefaultProperties defaultProperties) {
+                                                 DefaultProperties defaultProperties) {
     logger.debug("Resolving R2 Properties " + props);
     return props
         .stream()
@@ -119,7 +121,7 @@ public abstract class PropertiesResolver<T extends R2Properties>
   }
 
   private Resolved<T> resolve(T props,
-                              R2DefaultProperties defProps) {
+                              DefaultProperties defProps) {
 
     T propsWithDefaults = withDefaults(props, defProps);
     List<String> errors = verifyProps(propsWithDefaults);
@@ -130,7 +132,7 @@ public abstract class PropertiesResolver<T extends R2Properties>
         Resolved.newSucc(propsWithDefaults);
   }
 
-  private T withDefaults(T props, R2DefaultProperties defProps) {
+  private T withDefaults(T props, DefaultProperties defProps) {
     if (absent(props.getCodecs())) {
       props.setCodecs(defProps.getCodecs());
     }
@@ -143,11 +145,11 @@ public abstract class PropertiesResolver<T extends R2Properties>
     return props;
   }
 
-  private R2DefaultProperties createDefaultProperties(R2DefaultProperties
+  private DefaultProperties createDefaultProperties(DefaultProperties
                                                           defProps) {
     logger.debug("Default R2 Properties " + defProps);
     if (defProps == null) {
-      defProps = new R2DefaultProperties();
+      defProps = new DefaultProperties();
     }
     if (absent(defProps.getCodecs())) {
       defProps.setCodecs(fallbackProps.getCodecs());

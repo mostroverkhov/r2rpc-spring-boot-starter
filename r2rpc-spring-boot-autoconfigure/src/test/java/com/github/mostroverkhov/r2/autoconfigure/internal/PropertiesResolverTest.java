@@ -1,7 +1,9 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
-import com.github.mostroverkhov.r2.autoconfigure.internal.server.R2ServerProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.EndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,10 +13,10 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public abstract class PropertiesResolverTest<T extends R2Properties> {
+public abstract class PropertiesResolverTest<T extends EndpointProperties> {
 
   protected PropertiesResolver<T> propertiesResolver;
-  protected R2DefaultProperties mockDefProps;
+  protected DefaultProperties mockDefProps;
   protected T mockProps;
 
   @Before
@@ -115,14 +117,14 @@ public abstract class PropertiesResolverTest<T extends R2Properties> {
 
   @Test
   public void propsAreEnabled() {
-    R2ServerProperties props = new R2ServerProperties();
+    ResponderEndpointProperties props = new ResponderEndpointProperties();
     assertThat(props.isEnabled()).isTrue();
   }
 
-  private R2DefaultProperties defProps() {
+  private DefaultProperties defProps() {
     String codec = "codec";
     String transport = "transport";
-    R2DefaultProperties defProps = new R2DefaultProperties();
+    DefaultProperties defProps = new DefaultProperties();
     defProps.setCodecs(Collections.singletonList(codec));
     defProps.setTransport(transport);
     return defProps;

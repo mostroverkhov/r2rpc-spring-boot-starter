@@ -1,12 +1,12 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
-import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.toSet;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.internal.CodecResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.Resolver;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
 import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
 import com.github.mostroverkhov.r2.core.DataCodec;
@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-class ServerConfigResolver implements Resolver<Set<R2ServerProperties>, Set<ServerConfig>> {
+class ServerConfigResolver implements Resolver<Set<ResponderEndpointProperties>, Set<ServerConfig>> {
 
   private final ServerTransportResolver serverTransportResolver;
   private final CodecResolver codecResolver;
@@ -37,14 +37,14 @@ class ServerConfigResolver implements Resolver<Set<R2ServerProperties>, Set<Serv
   }
 
   @Override
-  public Set<ServerConfig> resolve(Set<R2ServerProperties> r2ServerProperties) {
-    return r2ServerProperties
+  public Set<ServerConfig> resolve(Set<ResponderEndpointProperties> responderEndpointProperties) {
+    return responderEndpointProperties
         .stream()
         .map(this::resolveServerConfig)
         .collect(toSet());
   }
 
-  private ServerConfig resolveServerConfig(R2ServerProperties props) {
+  private ServerConfig resolveServerConfig(ResponderEndpointProperties props) {
     String name = props.getName();
     @SuppressWarnings("unchecked")
     R2ServerTransport<Closeable> transportFactory =

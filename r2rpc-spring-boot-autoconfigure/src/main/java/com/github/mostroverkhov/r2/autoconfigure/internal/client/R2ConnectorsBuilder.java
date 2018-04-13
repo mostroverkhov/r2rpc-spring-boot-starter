@@ -4,8 +4,9 @@ import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientConnector;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
 import com.github.mostroverkhov.r2.autoconfigure.client.RequesterApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
-import com.github.mostroverkhov.r2.autoconfigure.internal.R2DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.RequesterEndpointProperties;
 import io.rsocket.RSocketFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,8 +40,8 @@ class R2ConnectorsBuilder {
     return this;
   }
 
-  public ClientConnectors build(R2DefaultProperties defProps,
-                                List<R2ClientProperties> props) {
+  public ClientConnectors build(DefaultProperties defProps,
+                                List<RequesterEndpointProperties> props) {
     ClientPropertiesResolver propertiesResolver =
         new ClientPropertiesResolver(
             clientFallbackProperties());
@@ -50,13 +51,13 @@ class R2ConnectorsBuilder {
         orEmpty(dataCodecs),
         orEmpty(transports));
 
-    Resolved<Set<R2ClientProperties>> resolved = propertiesResolver
+    Resolved<Set<RequesterEndpointProperties>> resolved = propertiesResolver
         .resolve(props, defProps);
     if (resolved.isErr()) {
       throw new IllegalArgumentException(
           "R2Client config is not complete: " + resolved.err());
     }
-    Set<R2ClientProperties> clientProperties = resolved.succ();
+    Set<RequesterEndpointProperties> clientProperties = resolved.succ();
     Set<ClientConfig> clientConfigs = configResolver.resolve(clientProperties);
 
     Map<String, Supplier<R2ClientConnector>> endpoints = clientConfigs
@@ -78,10 +79,10 @@ class R2ConnectorsBuilder {
     return () -> new R2ClientConnector(config);
   }
 
-  static R2DefaultProperties clientFallbackProperties() {
-    R2DefaultProperties r2DefaultProperties = new R2DefaultProperties();
-    r2DefaultProperties.setTransport("tcp");
-    r2DefaultProperties.setCodecs(Collections.singletonList("jackson-json"));
-    return r2DefaultProperties;
+  static DefaultProperties clientFallbackProperties() {
+    DefaultProperties defaultProperties = new DefaultProperties();
+    defaultProperties.setTransport("tcp");
+    defaultProperties.setCodecs(Collections.singletonList("jackson-json"));
+    return defaultProperties;
   }
 }

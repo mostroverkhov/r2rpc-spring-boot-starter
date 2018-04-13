@@ -3,6 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
 import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
@@ -78,7 +79,7 @@ public class ServerConfigResolverTest {
   @Test
   public void resolveNoAPi() {
 
-    R2ServerProperties props = validProps();
+    ResponderEndpointProperties props = validProps();
     props.setApi(Collections.emptyList());
     Set<ServerConfig> resolved = resolver.resolve(Collections.singleton(props));
 
@@ -98,20 +99,20 @@ public class ServerConfigResolverTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void resolveMissingTransport() {
-    R2ServerProperties props = validProps();
+    ResponderEndpointProperties props = validProps();
     props.setTransport("absent");
     resolver.resolve(Collections.singleton(props));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void resolveMissingCodec() {
-    R2ServerProperties props = validProps();
+    ResponderEndpointProperties props = validProps();
     props.setCodecs(Collections.singletonList("absent"));
     resolver.resolve(Collections.singleton(props));
   }
 
-  private static R2ServerProperties validProps() {
-    R2ServerProperties props = new R2ServerProperties();
+  private static ResponderEndpointProperties validProps() {
+    ResponderEndpointProperties props = new ResponderEndpointProperties();
     props.setName("test");
     props.setPort(8081);
     props.setApi(asList("baz"));

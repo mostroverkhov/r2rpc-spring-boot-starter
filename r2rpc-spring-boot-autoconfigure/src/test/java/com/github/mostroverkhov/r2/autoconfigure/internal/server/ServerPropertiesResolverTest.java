@@ -2,6 +2,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolverTest;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +12,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ServerPropertiesResolverTest extends PropertiesResolverTest<R2ServerProperties> {
+public class ServerPropertiesResolverTest extends PropertiesResolverTest<ResponderEndpointProperties> {
 
   @Override
   @Before
@@ -22,9 +23,9 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<R2Serve
 
   @Test
   public void resolveInvalidPortProps() {
-    R2ServerProperties props = copy(mockProps);
+    ResponderEndpointProperties props = copy(mockProps);
     props.setPort(0);
-    Resolved<Set<R2ServerProperties>> resolved = propertiesResolver
+    Resolved<Set<ResponderEndpointProperties>> resolved = propertiesResolver
         .resolve(Collections.singletonList(props), mockDefProps);
     assertThat(resolved.isErr()).isTrue();
     assertThat(resolved.err()).hasSize(1);
@@ -32,10 +33,10 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<R2Serve
 
   @Test
   public void resolveMultipleInvalidProps() {
-    R2ServerProperties props = copy(mockProps);
+    ResponderEndpointProperties props = copy(mockProps);
     props.setName(null);
     props.setPort(0);
-    Resolved<Set<R2ServerProperties>> resolved = propertiesResolver
+    Resolved<Set<ResponderEndpointProperties>> resolved = propertiesResolver
         .resolve(Collections.singletonList(props), mockDefProps);
     assertThat(resolved.isErr()).isTrue();
     assertThat(resolved.err()).hasSize(2);
@@ -43,7 +44,7 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<R2Serve
 
 
   @Override
-  public R2ServerProperties createProps() {
+  public ResponderEndpointProperties createProps() {
 
     String api = MockProps.api;
     String codec = MockProps.codec;
@@ -51,7 +52,7 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<R2Serve
     String name = MockProps.name;
     int port = 8081;
 
-    R2ServerProperties mockProps = new R2ServerProperties();
+    ResponderEndpointProperties mockProps = new ResponderEndpointProperties();
     mockProps.setName(name);
     mockProps.setCodecs(Collections.singletonList(codec));
     mockProps.setApi(Arrays.asList(api));
@@ -62,8 +63,8 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<R2Serve
   }
 
   @Override
-  public R2ServerProperties copy(R2ServerProperties props) {
-    R2ServerProperties copy = new R2ServerProperties();
+  public ResponderEndpointProperties copy(ResponderEndpointProperties props) {
+    ResponderEndpointProperties copy = new ResponderEndpointProperties();
     copy.setPort(props.getPort());
     copy.setTransport(props.getTransport());
     copy.setApi(props.getApi());

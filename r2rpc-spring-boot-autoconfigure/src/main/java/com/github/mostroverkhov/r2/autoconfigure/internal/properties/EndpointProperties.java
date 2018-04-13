@@ -1,8 +1,8 @@
-package com.github.mostroverkhov.r2.autoconfigure.internal;
+package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 
 import java.util.List;
 
-public abstract class R2Properties {
+public abstract class EndpointProperties {
   protected String name;
   protected String transport;
   protected List<String> codecs;

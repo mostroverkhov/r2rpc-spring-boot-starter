@@ -10,7 +10,7 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.util.function.Predicate;
 
-public class EndpointSupportTest {
+public class EndpointPropertiesSupportTest {
 
   private EndpointSupport endpointSupport;
 
