@@ -96,7 +96,7 @@ r2rpc:
 ```
 
 For each endpoint auto-configuration creates `R2ClientConnector`, which connects to peer with `connect(address,port)`, returns `ApiRequesterFactory`. `ApiRequesterFactory.create(API.class)` returns implementation (dyn proxy) of API interface.
-Individual Connectors are obtained with `ClientConnectors.name(endpoint-name)`. APIs are registered by providing bean `RequesterApiProvider<ApiToken>`, where `APiToken` - any class, its package is scanned by auto-configuration for APIs (@R2API annotated interfaces)
+Individual Connectors are obtained with `ClientConnectors.name(endpoint-name)`. APIs are registered by providing bean `RequesterApiProvider<ApiToken>`, where `APiToken` - any class, its package is scanned by auto-configuration for APIs (`@R2API` annotated interfaces)
 
 ### Examples
 
