@@ -1,9 +1,8 @@
-package com.github.mostroverkhov.r2.autoconfigure.internal;
+package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 
 import java.util.List;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
-public class R2DefaultProperties {
+public class DefaultProperties {
 
   private List<String> codecs;
   private String transport;
@@ -26,7 +25,7 @@ public class R2DefaultProperties {
 
   @Override
   public String toString() {
-    return "R2DefaultProperties{" +
+    return "DefaultProperties{" +
         "codecs=" + codecs +
         ", transport='" + transport + '\'' +
         '}';

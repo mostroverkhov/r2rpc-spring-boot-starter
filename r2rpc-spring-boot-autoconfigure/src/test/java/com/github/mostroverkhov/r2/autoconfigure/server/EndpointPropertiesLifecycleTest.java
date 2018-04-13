@@ -14,7 +14,7 @@ import java.time.Duration;
 import static com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointResult.error;
 import static com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointResult.success;
 
-public class EndpointLifecycleTest {
+public class EndpointPropertiesLifecycleTest {
 
   @Test
   public void lifecycleSuccess() {

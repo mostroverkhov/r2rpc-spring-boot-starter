@@ -1,8 +1,6 @@
-package com.github.mostroverkhov.r2.autoconfigure.internal.server;
+package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 
-import com.github.mostroverkhov.r2.autoconfigure.internal.R2Properties;
-
-public class R2ServerProperties extends R2Properties {
+public class ResponderEndpointProperties extends EndpointProperties {
 
   private int port;
 
@@ -16,7 +14,7 @@ public class R2ServerProperties extends R2Properties {
 
   @Override
   public String toString() {
-    return "R2ServerProperties{" +
+    return "ResponderEndpointProperties{" +
         "name='" + name + '\'' +
         ", transport='" + transport + '\'' +
         ", port=" + port +

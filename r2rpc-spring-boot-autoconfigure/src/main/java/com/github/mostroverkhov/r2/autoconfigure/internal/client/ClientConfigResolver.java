@@ -5,6 +5,7 @@ import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
 import com.github.mostroverkhov.r2.autoconfigure.client.RequesterApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.CodecResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.Resolver;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.RequesterEndpointProperties;
 
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ import static io.rsocket.RSocketFactory.ClientRSocketFactory;
 import static java.util.stream.Collectors.toSet;
 
 public class ClientConfigResolver implements
-    Resolver<Set<R2ClientProperties>, Set<ClientConfig>> {
+    Resolver<Set<RequesterEndpointProperties>, Set<ClientConfig>> {
   private ClientRSocketFactory clientRSocketFactory;
   private final CodecResolver codecResolver;
   private final ClientTransportResolver clientTransportResolver;
@@ -30,14 +31,14 @@ public class ClientConfigResolver implements
   }
 
   @Override
-  public Set<ClientConfig> resolve(Set<R2ClientProperties> props) {
+  public Set<ClientConfig> resolve(Set<RequesterEndpointProperties> props) {
     return props
         .stream()
         .map(this::resolve)
         .collect(toSet());
   }
 
-  private ClientConfig resolve(R2ClientProperties clientProperties) {
+  private ClientConfig resolve(RequesterEndpointProperties clientProperties) {
     String name = clientProperties.getName();
     List<R2DataCodec> codecFactories = codecResolver
         .resolve(clientProperties.getCodecs());

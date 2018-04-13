@@ -5,6 +5,7 @@ import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransportTcp;
 import com.github.mostroverkhov.r2.autoconfigure.client.RequesterApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.*;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;
 import io.rsocket.RSocketFactory;
 import io.rsocket.transport.netty.NettyDuplexConnection;
@@ -22,11 +23,11 @@ import java.util.Optional;
 import static io.rsocket.RSocketFactory.ClientRSocketFactory;
 
 @Configuration
-@EnableConfigurationProperties(R2ClientRootProperties.class)
+@EnableConfigurationProperties(R2RpcProperties.class)
 public class R2ClientAutoConfiguration {
 
   @Autowired
-  private R2ClientRootProperties rootProperties;
+  private R2RpcProperties rootProperties;
 
   @ConditionalOnMissingBean
   @Bean
@@ -54,12 +55,25 @@ public class R2ClientAutoConfiguration {
       Optional<List<R2DataCodec>> dataCodecs,
       Optional<List<R2ClientTransport>> transports) {
 
+    Optional<RequesterProperties>
+        clientRequester =
+        Optional.of(
+            rootProperties)
+            .map(R2RpcProperties::getClient)
+            .map(PeerProperties::getRequester);
+
+    DefaultProperties defaultProperties = clientRequester
+        .map(RequesterProperties::getDefaults)
+        .orElse(null);
+
+    List<RequesterEndpointProperties> endpoints = clientRequester
+        .map(RequesterProperties::getEndpoints)
+        .orElse(null);
+
     return new R2ConnectorsBuilder(clientRSocketFactory)
         .apiProviders(apiProviders)
         .dataCodecs(dataCodecs)
         .transports(transports)
-        .build(
-            rootProperties.getDefaults(),
-            rootProperties.getEndpoints());
+        .build(defaultProperties, endpoints);
   }
 }

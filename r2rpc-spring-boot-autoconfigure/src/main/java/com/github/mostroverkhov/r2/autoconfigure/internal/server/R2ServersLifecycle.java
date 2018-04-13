@@ -1,8 +1,9 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
-import com.github.mostroverkhov.r2.autoconfigure.internal.R2DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
 import com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointSupport;
 import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
@@ -304,8 +305,8 @@ public class R2ServersLifecycle implements SmartLifecycle {
       return this;
     }
 
-    public R2ServersLifecycle build(R2DefaultProperties defProps,
-                                    List<R2ServerProperties> props) {
+    public R2ServersLifecycle build(DefaultProperties defProps,
+                                    List<ResponderEndpointProperties> props) {
       ServerPropertiesResolver propertiesResolver =
           new ServerPropertiesResolver(
               serverFallbackProperties());
@@ -317,7 +318,7 @@ public class R2ServersLifecycle implements SmartLifecycle {
 
       EndpointSupport endpointSupport = new EndpointSupport();
 
-      Resolved<Set<R2ServerProperties>> resolvedProps =
+      Resolved<Set<ResponderEndpointProperties>> resolvedProps =
           propertiesResolver
               .resolve(props, defProps);
       if (resolvedProps.isErr()) {
@@ -325,7 +326,7 @@ public class R2ServersLifecycle implements SmartLifecycle {
             "R2Server config is not complete: " + resolvedProps.err());
       }
 
-      Set<R2ServerProperties> serverProps = resolvedProps.succ();
+      Set<ResponderEndpointProperties> serverProps = resolvedProps.succ();
       Set<ServerConfig> serverConfigs = configResolver.resolve(serverProps);
 
       return new R2ServersLifecycle(
@@ -337,11 +338,11 @@ public class R2ServersLifecycle implements SmartLifecycle {
       return list.orElse(Collections.emptyList());
     }
 
-    private static R2DefaultProperties serverFallbackProperties() {
-      R2DefaultProperties r2DefaultProperties = new R2DefaultProperties();
-      r2DefaultProperties.setTransport("tcp");
-      r2DefaultProperties.setCodecs(Collections.singletonList("jackson-json"));
-      return r2DefaultProperties;
+    private static DefaultProperties serverFallbackProperties() {
+      DefaultProperties defaultProperties = new DefaultProperties();
+      defaultProperties.setTransport("tcp");
+      defaultProperties.setCodecs(Collections.singletonList("jackson-json"));
+      return defaultProperties;
     }
   }
 }

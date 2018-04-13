@@ -1,19 +1,20 @@
 
 r2rpc:
-
  server:
-  defaults:
-    codecs: [jackson-json]
-    transport: tcp
-  endpoints:
-    - name: foo
-      port: 8083
-      api: [bar, baz]
+  responder:
+    defaults:
+      codecs: [jackson-json]
+      transport: tcp
+    endpoints:
+      - name: foo
+        port: 8083
+        api: [bar, baz]
 
  client:
-  endpoints:
-    - name: foo
-      api: [bar, baz]
+  requester:
+    endpoints:
+      - name: foo
+        api: [bar, baz]
 
 logging:
   level:

@@ -17,7 +17,7 @@ public class Endpoint {
 
   @Override
   public String toString() {
-    return "Endpoint{" +
+    return "EndpointProperties{" +
         "name='" + name + '\'' +
         '}';
   }
