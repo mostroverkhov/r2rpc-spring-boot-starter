@@ -32,7 +32,7 @@ API definitions allow to group related R2RPC services in one namespace so they c
 
 Single API definition, referred in configuration as `api:[example]`, can be as follows
 
-```
+```java
 @R2Api("example")
 public interface ExampleApi {
 
@@ -84,7 +84,7 @@ endpoint Start and Stop events (success or error), e.g.
 * sensible auto-configuration (simple `ClientRSocketFactory`, `JSON` serialization and `TCP` transport)
 * declarative definition of Client Connectors
 
-```java 
+```yaml 
 r2rpc:
  client:
   requester:
