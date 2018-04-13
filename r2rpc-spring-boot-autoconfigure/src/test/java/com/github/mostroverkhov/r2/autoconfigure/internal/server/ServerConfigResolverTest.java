@@ -79,7 +79,7 @@ public class ServerConfigResolverTest {
   public void resolveNoAPi() {
 
     R2ServerProperties props = validProps();
-    props.setApi(null);
+    props.setApi(Collections.emptyList());
     Set<ServerConfig> resolved = resolver.resolve(Collections.singleton(props));
 
     assertThat(resolved)
