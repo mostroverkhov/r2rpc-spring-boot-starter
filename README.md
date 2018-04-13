@@ -4,7 +4,9 @@
 
 Spring Boot 2 starter for [R2RPC](https://github.com/mostroverkhov/r2) - [RSocket](https://github.com/rsocket/rsocket) based RPC framework with pluggable serialization.
 
-Simplifies creation of `R2RPC` servers by providing:
+Simplifies creation of `R2RPC` Clients and Servers by providing:
+
+### Server
 
 * sensible auto-configuration (simple `ServerRSocketFactory`, `JSON` serialization and `TCP` transport)
 * declarative definition of server endpoints (YAML is preferred)  
@@ -13,17 +15,17 @@ Simplifies creation of `R2RPC` servers by providing:
 r2rpc:
  server:
   defaults:
-    codecs: [jackson]
+    codecs: [jackson-json]
     transport: tcp
   endpoints:
     - name: foo
       port: 8083
       api: [baz, bar]
 ```
-Custom transports can be provided as `@R2ServerTransport` annotated Spring beans, and custom codecs - with `@R2DataCodec`.
+Custom transports can be provided as implementations of `R2ServerTransport`, annotated with `@Name(value)`. Custom codecs - with `2DataCodec` implementations, also annotated with `@Name`.
 
 `api` is set of API interfaces annotated with `R2Api(name)`, each aggregates [R2RPC](https://github.com/mostroverkhov/r2) service definitions. Its implementation serves as Endpoint handler, and must be provided to Spring with 
-`ServerApiProvider` bean for each API implementation.   
+`ResponderApiProvider` bean for each API implementation.   
 
 API definitions allow to group related R2RPC services in one namespace so they can be shared more conveniently.
 
@@ -53,7 +55,7 @@ API definition is exposed to Spring with `ServerApiProvider<ExampleApiImpl>` imp
 where `ExampleApiImpl` is implementation of `ExampleApi` providing handlers for incoming 
 requests.
 ```java
-public class ExampleApiProvider implements ServerApiProvider<ExampleApiImpl> {
+public class ExampleApiProvider implements ResponderApiProvider<ExampleApiImpl> {
 
   @Override
   public ExampleApiImpl apply(ConnectionContext connectionContext) {
@@ -76,6 +78,25 @@ endpoint Start and Stop events (success or error), e.g.
                 .endpoint("foo")
                 .started()
 ```  
+### Client
+
+* sensible auto-configuration (simple `ClientRSocketFactory`, `JSON` serialization and `TCP` transport)
+* declarative definition of Client Connectors
+
+```java 
+r2rpc:
+
+ client:
+  defaults:
+    codecs: [jackson-json]
+    transport: tcp
+  endpoints:
+    - name: foo
+      api: [bar, baz]
+```
+
+For each endpoint auto-configuration creates `R2ClientConnector`, which connects to peer with `connect(address,port)`, returns `ApiRequesterFactory`. `ApiRequesterFactory.create(API.class)` returns implementation (dyn proxy) of API interface.
+Individual Connectors are obtained with `ClientConnectors.name(endpoint-name)`. APIs are registered by providing bean `RequesterApiProvider<ApiToken>`, where APiToken - any class, its package is scanned by auto-configuration for APIs (@R2API annotated interfaces)
 
 ### Examples
 
