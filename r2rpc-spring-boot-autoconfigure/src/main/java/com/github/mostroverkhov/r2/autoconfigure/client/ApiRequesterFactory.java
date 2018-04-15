@@ -36,7 +36,7 @@ public class ApiRequesterFactory {
             if (contractType.isInterface()) {
               return requesterFactory.create(contractType);
             } else {
-              return interfaceExpectedException(method);
+              throw interfaceExpectedException(method);
             }
           } else {
             throw simpleClassExpectedException(method);
