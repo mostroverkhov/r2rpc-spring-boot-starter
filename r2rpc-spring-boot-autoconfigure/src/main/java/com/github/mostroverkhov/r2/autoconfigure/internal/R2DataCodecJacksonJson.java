@@ -5,7 +5,7 @@ import com.github.mostroverkhov.r2.autoconfigure.Name;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.DataCodec;
 
-@Name("jackson-json")
+@Name("json")
 public class R2DataCodecJacksonJson implements R2DataCodec {
   private final DataCodec dataCodec = new JacksonJsonDataCodec();
 

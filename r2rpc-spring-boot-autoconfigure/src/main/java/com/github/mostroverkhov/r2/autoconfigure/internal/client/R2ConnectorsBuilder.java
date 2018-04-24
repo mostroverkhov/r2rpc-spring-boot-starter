@@ -82,7 +82,7 @@ class R2ConnectorsBuilder {
   static DefaultProperties clientFallbackProperties() {
     DefaultProperties defaultProperties = new DefaultProperties();
     defaultProperties.setTransport("tcp");
-    defaultProperties.setCodecs(Collections.singletonList("jackson-json"));
+    defaultProperties.setCodecs(Collections.singletonList("json"));
     return defaultProperties;
   }
 }

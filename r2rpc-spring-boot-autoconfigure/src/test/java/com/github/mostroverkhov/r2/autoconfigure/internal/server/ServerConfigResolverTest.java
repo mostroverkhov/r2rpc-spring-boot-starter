@@ -117,7 +117,7 @@ public class ServerConfigResolverTest {
     props.setPort(8081);
     props.setApi(asList("baz"));
     props.setTransport("tcp");
-    props.setCodecs(Collections.singletonList("jackson-json"));
+    props.setCodecs(Collections.singletonList("json"));
     return props;
   }
 

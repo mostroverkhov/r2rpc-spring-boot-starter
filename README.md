@@ -16,7 +16,7 @@ r2rpc:
  server:
   responder:
     defaults:
-      codecs: [jackson-json]
+      codecs: [json]
       transport: tcp
     endpoints:
       - name: foo
@@ -89,7 +89,7 @@ r2rpc:
  client:
   requester:
     defaults:
-      codecs: [jackson-json]
+      codecs: [json]
       transport: tcp
     endpoints:
       - name: foo
