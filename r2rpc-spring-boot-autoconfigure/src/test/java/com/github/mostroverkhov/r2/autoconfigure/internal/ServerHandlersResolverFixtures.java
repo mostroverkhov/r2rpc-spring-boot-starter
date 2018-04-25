@@ -1,61 +1,68 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
+import com.github.mostroverkhov.r2.core.ConnectionContext;
 import com.github.mostroverkhov.r2.core.contract.RequestStream;
 import com.github.mostroverkhov.r2.core.contract.Service;
-import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 
-class HandlerResolverApiResolutionFixtures {
+class ServerHandlersResolverFixtures {
 
-  static class RenamedValidApiProvider implements ResponderApiProvider<RenamedValidApiImpl> {
+  static class RenamedValidServer implements ServerHandlersProvider<RenamedValidApiImpl> {
 
     @Override
-    public RenamedValidApiImpl apply(ConnectionContext connectionContext) {
+    public RenamedValidApiImpl apply(ConnectionContext ctx,
+                                     ApiRequesterFactory requesterFactory) {
       return new RenamedValidApiImpl();
     }
   }
 
-  static class TwoApisProvider implements ResponderApiProvider<TwoApisImpl> {
+  static class TwoApisProviderServer implements ServerHandlersProvider<TwoApisImpl> {
 
     @Override
-    public TwoApisImpl apply(ConnectionContext connectionContext) {
+    public TwoApisImpl apply(ConnectionContext ctx,
+                             ApiRequesterFactory requesterFactory) {
       return new TwoApisImpl();
     }
   }
 
-  static class NoApisProvider implements ResponderApiProvider<ArrayList<String>> {
+  static class NoApisProviderServer implements ServerHandlersProvider<ArrayList<String>> {
 
     @Override
-    public ArrayList<String> apply(ConnectionContext connectionContext) {
+    public ArrayList<String> apply(ConnectionContext ctx,
+                                   ApiRequesterFactory requesterFactory) {
       return new ArrayList<>();
     }
   }
 
-  static class ValidApiProvider implements ResponderApiProvider<ValidApiImpl> {
+  static class ValidServer implements ServerHandlersProvider<ValidApiImpl> {
 
     @Override
-    public ValidApiImpl apply(ConnectionContext connectionContext) {
+    public ValidApiImpl apply(ConnectionContext ctx,
+                              ApiRequesterFactory requesterFactory) {
       return new ValidApiImpl();
     }
   }
 
-  static class AnotherValidApiProvider implements ResponderApiProvider<AnotherValidApiImpl> {
+  static class AnotherValidServer implements ServerHandlersProvider<AnotherValidApiImpl> {
 
     @Override
-    public AnotherValidApiImpl apply(ConnectionContext connectionContext) {
-      return new AnotherValidApiImpl(connectionContext);
+    public AnotherValidApiImpl apply(ConnectionContext ctx,
+                                     ApiRequesterFactory requesterFactory) {
+      return new AnotherValidApiImpl(ctx);
     }
   }
 
-  static class ValidNamedApiProvider implements ResponderApiProvider<NamedValidApiImpl> {
+  static class ValidNamedServer implements ServerHandlersProvider<NamedValidApiImpl> {
 
     @Override
-    public NamedValidApiImpl apply(ConnectionContext connectionContext) {
-      return new NamedValidApiImpl(connectionContext);
+    public NamedValidApiImpl apply(ConnectionContext ctx,
+                                   ApiRequesterFactory apiRequesterFactory) {
+      return new NamedValidApiImpl(ctx);
     }
   }
 

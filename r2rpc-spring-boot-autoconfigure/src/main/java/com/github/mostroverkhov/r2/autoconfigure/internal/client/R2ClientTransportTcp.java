@@ -1,6 +1,7 @@
-package com.github.mostroverkhov.r2.autoconfigure.client;
+package com.github.mostroverkhov.r2.autoconfigure.internal.client;
 
 import com.github.mostroverkhov.r2.autoconfigure.Name;
+import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 

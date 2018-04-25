@@ -1,13 +1,14 @@
 package com.github.mostroverkhov.r2.example;
 
-import com.github.mostroverkhov.r2.autoconfigure.client.ApiRequesterFactory;
+import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
 import com.github.mostroverkhov.r2.autoconfigure.internal.client.ClientConnectors;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.Endpoint;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
 import com.github.mostroverkhov.r2.example.api.*;
-import com.github.mostroverkhov.r2.example.client.BarBazRequesterApiProvider;
-import com.github.mostroverkhov.r2.example.server.BazServerApiProvider;
-import com.github.mostroverkhov.r2.example.server.BarServerApiProvider;
+import com.github.mostroverkhov.r2.example.client.BarBazRequestersProvider;
+import com.github.mostroverkhov.r2.example.client.BazClientHandlersProvider;
+import com.github.mostroverkhov.r2.example.server.BarServerServer;
+import com.github.mostroverkhov.r2.example.server.BazServerHandlersProvider;
 import com.github.mostroverkhov.r2.example.svc.Bar;
 import com.github.mostroverkhov.r2.example.svc.Baz;
 import org.jetbrains.annotations.NotNull;
@@ -34,21 +35,27 @@ public class R2rpcStarterExampleApplication {
   public static void main(String[] args) {
     SpringApplication.run(R2rpcStarterExampleApplication.class, args);
   }
-  /*baz API handlers*/
+  /*baz server API handlers*/
   @Bean
-  public BazServerApiProvider bazApi() {
-    return new BazServerApiProvider();
+  public BazServerHandlersProvider bazServerApi() {
+    return new BazServerHandlersProvider();
+  }
+
+  /*baz client API handlers*/
+  @Bean
+  public BazClientHandlersProvider bazClientApi() {
+    return new BazClientHandlersProvider();
   }
   /*bar API handlers*/
   @Bean
-  public BarServerApiProvider barApi() {
-    return new BarServerApiProvider();
+  public BarServerServer barApi() {
+    return new BarServerServer();
   }
   /*hint used by R2RPC autoconfiguration to find APIs. In this case,
   * BarBazApiToken location determines APIs package*/
   @Bean
-  BarBazRequesterApiProvider clientApiProvider() {
-    return new BarBazRequesterApiProvider();
+  BarBazRequestersProvider clientApiProvider() {
+    return new BarBazRequestersProvider();
   }
 
   @Bean
@@ -83,9 +90,9 @@ public class R2rpcStarterExampleApplication {
                       BarAndBaz::new)
               ))
           .subscribe(
-              baz -> logger.debug("Got BarBaz response: " + baz),
-              err -> logger.error("BarBaz error: ", err),
-              () -> logger.debug("BarBaz completed"));
+              baz -> logger.debug("Client Got BarBaz response: " + baz),
+              err -> logger.error("Client BarBaz error: ", err),
+              () -> logger.debug("Client BarBaz completed"));
     };
   }
 

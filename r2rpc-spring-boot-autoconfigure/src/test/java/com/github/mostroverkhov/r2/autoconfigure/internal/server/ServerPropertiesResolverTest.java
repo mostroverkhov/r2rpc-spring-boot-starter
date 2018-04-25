@@ -2,7 +2,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolverTest;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ServerEndpointProperties;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ServerPropertiesResolverTest extends PropertiesResolverTest<ResponderEndpointProperties> {
+public class ServerPropertiesResolverTest extends PropertiesResolverTest<ServerEndpointProperties> {
 
   @Override
   @Before
@@ -23,9 +23,9 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<Respond
 
   @Test
   public void resolveInvalidPortProps() {
-    ResponderEndpointProperties props = copy(mockProps);
+    ServerEndpointProperties props = copy(mockProps);
     props.setPort(0);
-    Resolved<Set<ResponderEndpointProperties>> resolved = propertiesResolver
+    Resolved<Set<ServerEndpointProperties>> resolved = propertiesResolver
         .resolve(Collections.singletonList(props), mockDefProps);
     assertThat(resolved.isErr()).isTrue();
     assertThat(resolved.err()).hasSize(1);
@@ -33,10 +33,10 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<Respond
 
   @Test
   public void resolveMultipleInvalidProps() {
-    ResponderEndpointProperties props = copy(mockProps);
+    ServerEndpointProperties props = copy(mockProps);
     props.setName(null);
     props.setPort(0);
-    Resolved<Set<ResponderEndpointProperties>> resolved = propertiesResolver
+    Resolved<Set<ServerEndpointProperties>> resolved = propertiesResolver
         .resolve(Collections.singletonList(props), mockDefProps);
     assertThat(resolved.isErr()).isTrue();
     assertThat(resolved.err()).hasSize(2);
@@ -44,7 +44,7 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<Respond
 
 
   @Override
-  public ResponderEndpointProperties createProps() {
+  public ServerEndpointProperties createProps() {
 
     String api = MockProps.api;
     String codec = MockProps.codec;
@@ -52,10 +52,10 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<Respond
     String name = MockProps.name;
     int port = 8081;
 
-    ResponderEndpointProperties mockProps = new ResponderEndpointProperties();
+    ServerEndpointProperties mockProps = new ServerEndpointProperties();
     mockProps.setName(name);
     mockProps.setCodecs(Collections.singletonList(codec));
-    mockProps.setApi(Arrays.asList(api));
+    mockProps.setResponders(Arrays.asList(api));
     mockProps.setTransport(transport);
     mockProps.setPort(port);
 
@@ -63,11 +63,11 @@ public class ServerPropertiesResolverTest extends PropertiesResolverTest<Respond
   }
 
   @Override
-  public ResponderEndpointProperties copy(ResponderEndpointProperties props) {
-    ResponderEndpointProperties copy = new ResponderEndpointProperties();
+  public ServerEndpointProperties copy(ServerEndpointProperties props) {
+    ServerEndpointProperties copy = new ServerEndpointProperties();
     copy.setPort(props.getPort());
     copy.setTransport(props.getTransport());
-    copy.setApi(props.getApi());
+    copy.setResponders(props.getResponders());
     copy.setCodecs(props.getCodecs());
     copy.setName(props.getName());
     copy.setEnabled(props.isEnabled());

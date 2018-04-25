@@ -4,22 +4,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "r2rpc")
 public class R2RpcProperties {
-  private PeerProperties server;
-  private PeerProperties client;
+  private ServerProperties server;
+  private ClientProperties client;
 
-  public PeerProperties getServer() {
+  public ServerProperties getServer() {
     return server;
   }
 
-  public void setServer(PeerProperties server) {
+  public void setServer(ServerProperties server) {
     this.server = server;
   }
 
-  public PeerProperties getClient() {
+  public ClientProperties getClient() {
     return client;
   }
 
-  public void setClient(PeerProperties client) {
+  public void setClient(ClientProperties client) {
     this.client = client;
   }
 

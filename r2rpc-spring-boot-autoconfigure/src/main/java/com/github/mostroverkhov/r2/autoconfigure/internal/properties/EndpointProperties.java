@@ -3,11 +3,12 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 import java.util.List;
 
 public abstract class EndpointProperties {
-  protected String name;
-  protected String transport;
-  protected List<String> codecs;
-  protected List<String> api;
-  protected boolean enabled = true;
+  String name;
+  String transport;
+  List<String> codecs;
+  List<String> requesters;
+  List<String> responders;
+  boolean enabled = true;
 
   public String getName() {
     return name;
@@ -33,12 +34,20 @@ public abstract class EndpointProperties {
     this.codecs = codecs;
   }
 
-  public List<String> getApi() {
-    return api;
+  public List<String> getResponders() {
+    return responders;
   }
 
-  public void setApi(List<String> api) {
-    this.api = api;
+  public void setResponders(List<String> responders) {
+    this.responders = responders;
+  }
+
+  public List<String> getRequesters() {
+    return requesters;
+  }
+
+  public void setRequesters(List<String> requesters) {
+    this.requesters = requesters;
   }
 
   public boolean isEnabled() {

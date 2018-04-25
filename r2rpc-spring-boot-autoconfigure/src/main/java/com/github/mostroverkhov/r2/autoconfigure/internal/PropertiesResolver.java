@@ -18,7 +18,7 @@ public abstract class PropertiesResolver<T extends EndpointProperties>
       .getLogger(PropertiesResolver.class);
 
   private final DefaultProperties fallbackProps;
-  private final List<Function<T, Optional<String>>> verif = new ArrayList<>();
+  private final List<Function<T, Optional<String>>> verifications = new ArrayList<>();
 
   public PropertiesResolver(DefaultProperties fallbackProps) {
     Objects.requireNonNull(fallbackProps);
@@ -51,11 +51,11 @@ public abstract class PropertiesResolver<T extends EndpointProperties>
   @SuppressWarnings("unchecked")
   @Override
   public void addVerifications(Function<T, Optional<String>>... functions) {
-    verif.addAll(Arrays.asList(functions));
+    verifications.addAll(Arrays.asList(functions));
   }
 
   private List<String> verifyProps(T props) {
-    return verif
+    return verifications
         .stream()
         .map(v -> v.apply(props))
         .filter(Optional::isPresent)
@@ -128,8 +128,7 @@ public abstract class PropertiesResolver<T extends EndpointProperties>
     if (!errors.isEmpty()) {
       return Resolved.newErr(errors);
     }
-    return
-        Resolved.newSucc(propsWithDefaults);
+    return Resolved.newSucc(propsWithDefaults);
   }
 
   private T withDefaults(T props, DefaultProperties defProps) {
@@ -139,8 +138,8 @@ public abstract class PropertiesResolver<T extends EndpointProperties>
     if (absent(props.getTransport())) {
       props.setTransport(defProps.getTransport());
     }
-    if (absent(props.getApi())) {
-      props.setApi(Collections.emptyList());
+    if (absent(props.getResponders())) {
+      props.setResponders(Collections.emptyList());
     }
     return props;
   }

@@ -1,30 +1,24 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 
-public class PeerProperties {
-  private RequesterProperties requester;
-  private ResponderProperties responder;
+import java.util.List;
 
-  public RequesterProperties getRequester() {
-    return requester;
+public abstract class PeerProperties<T extends EndpointProperties> {
+  private DefaultProperties defaults;
+  private List<T> endpoints;
+
+  public DefaultProperties getDefaults() {
+    return defaults;
   }
 
-  public void setRequester(RequesterProperties requester) {
-    this.requester = requester;
+  public void setDefaults(DefaultProperties defaults) {
+    this.defaults = defaults;
   }
 
-  public ResponderProperties getResponder() {
-    return responder;
+  public List<T> getEndpoints() {
+    return endpoints;
   }
 
-  public void setResponder(ResponderProperties responder) {
-    this.responder = responder;
-  }
-
-  @Override
-  public String toString() {
-    return "PeerProperties{" +
-        "requesterProperties=" + requester +
-        ", responderProperties=" + responder +
-        '}';
+  public void setEndpoints(List<T> endpoints) {
+    this.endpoints = endpoints;
   }
 }

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class BeanLocatorTest {
+public class BeanUtilsTest {
 
   @Test
   public void resolvePresent() {

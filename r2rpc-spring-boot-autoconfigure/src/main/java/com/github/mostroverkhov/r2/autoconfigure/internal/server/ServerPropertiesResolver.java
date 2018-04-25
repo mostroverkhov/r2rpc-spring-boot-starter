@@ -3,12 +3,12 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver;
 import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
 import com.github.mostroverkhov.r2.autoconfigure.internal.Verifications;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ServerEndpointProperties;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-class ServerPropertiesResolver extends PropertiesResolver<ResponderEndpointProperties> {
+class ServerPropertiesResolver extends PropertiesResolver<ServerEndpointProperties> {
 
   public ServerPropertiesResolver(DefaultProperties fallbackServerProps) {
     super(fallbackServerProps);
@@ -16,11 +16,11 @@ class ServerPropertiesResolver extends PropertiesResolver<ResponderEndpointPrope
 
   @SuppressWarnings("unchecked")
   @Override
-  public void verifications(Verifications<ResponderEndpointProperties> verifications) {
+  public void verifications(Verifications<ServerEndpointProperties> verifications) {
     verifications.addVerifications(name(), port());
   }
 
-  private Function<ResponderEndpointProperties, Optional<String>> port() {
+  private Function<ServerEndpointProperties, Optional<String>> port() {
     return props -> {
       int port = props.getPort();
       if (port <= 0) {

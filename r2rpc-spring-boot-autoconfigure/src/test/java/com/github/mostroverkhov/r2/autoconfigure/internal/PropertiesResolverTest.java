@@ -3,7 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
 import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
 import com.github.mostroverkhov.r2.autoconfigure.internal.properties.EndpointProperties;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ServerEndpointProperties;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -78,7 +78,7 @@ public abstract class PropertiesResolverTest<T extends EndpointProperties> {
   @Test
   public void resolveMissingApisProps() {
     T props = copy(mockProps);
-    props.setApi(null);
+    props.setResponders(null);
     Resolved<Set<T>> resolved = propertiesResolver
         .resolve(Collections.singletonList(props), mockDefProps);
     assertThat(resolved.isErr()).isFalse();
@@ -117,7 +117,7 @@ public abstract class PropertiesResolverTest<T extends EndpointProperties> {
 
   @Test
   public void propsAreEnabled() {
-    ResponderEndpointProperties props = new ResponderEndpointProperties();
+    ServerEndpointProperties props = new ServerEndpointProperties();
     assertThat(props.isEnabled()).isTrue();
   }
 

@@ -1,15 +1,15 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 
-public class RequesterEndpointProperties extends EndpointProperties {
-
+public class ClientEndpointProperties extends EndpointProperties {
   @Override
   public String toString() {
-    return "RequesterEndpointProperties{" +
+    return "ClientEndpointProperties{" +
         "name='" + name + '\'' +
         ", transport='" + transport + '\'' +
         ", codecs=" + codecs +
-        ", api=" + api +
+        ", requesters=" + requesters +
+        ", responders=" + responders +
         ", enabled=" + enabled +
-        '}';
+        "} " + super.toString();
   }
 }
