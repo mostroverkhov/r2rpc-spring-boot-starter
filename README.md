@@ -146,7 +146,7 @@ override name on implementation itself by annotating It with `@R2API(newName)`
 
 ### Examples
 
-Example module contains simple self-contained runnable application - `R2rpcStarterExampleApplicaton`.
+Example module contains simple self-contained runnable application - [R2rpcStarterExampleApplicaton](https://github.com/mostroverkhov/r2rpc-spring-boot-starter/blob/master/r2rpc-spring-boot-starter-example/src/main/java/com/github/mostroverkhov/r2/example/R2rpcStarterExampleApplication.java)
 
 ### LICENSE
 
