@@ -5,7 +5,7 @@ import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
 import com.github.mostroverkhov.r2.core.ConnectionContext;
 import com.github.mostroverkhov.r2.example.server.handlers.BarApiImpl;
 
-public class BarServerServer implements ServerHandlersProvider<BarApiImpl> {
+public class BarServerHandlersProvider implements ServerHandlersProvider<BarApiImpl> {
 
   @Override
   public BarApiImpl apply(ConnectionContext connectionContext,
