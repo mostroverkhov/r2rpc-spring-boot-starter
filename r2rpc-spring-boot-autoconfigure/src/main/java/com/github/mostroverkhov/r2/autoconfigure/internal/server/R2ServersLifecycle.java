@@ -1,17 +1,16 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.PropertiesResolver.Resolved;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ServerEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.apihandlers.ServerApiHandlersFactory;
 import com.github.mostroverkhov.r2.autoconfigure.internal.server.endpoints.EndpointSupport;
-import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
-import com.github.mostroverkhov.r2.core.DataCodec;
-import com.github.mostroverkhov.r2.core.responder.Codecs;
-import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
-import com.github.mostroverkhov.r2.core.responder.Services;
+import com.github.mostroverkhov.r2.core.*;
 import com.github.mostroverkhov.r2.java.R2Server;
 import io.rsocket.Closeable;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
@@ -27,7 +26,6 @@ import reactor.core.publisher.MonoProcessor;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
 
@@ -103,7 +101,7 @@ public class R2ServersLifecycle implements SmartLifecycle {
   private NamedStart serverStart(ServerConfig serverConfig) {
     String name = serverConfig.getName();
     ServerTransport<Closeable> transport = serverConfig.transport();
-    Function<ConnectionContext, Collection<Object>> handlers = serverConfig.handlers();
+    ServerApiHandlersFactory handlers = serverConfig.handlers();
     List<DataCodec> codecs = serverConfig.codecs();
     ServerRSocketFactory rSocketFactory = serverConfig.rSocketFactory();
 
@@ -112,7 +110,8 @@ public class R2ServersLifecycle implements SmartLifecycle {
             acceptor ->
                 acceptor
                     .codecs(addCodecs(codecs))
-                    .services(ctx -> addHandlers(ctx, handlers)
+                    .services((ctx, requesterFactory) ->
+                        addHandlers(ctx, requesterFactory, handlers)
                     ))
         .connectWith(rSocketFactory)
         .transport(transport)
@@ -129,9 +128,10 @@ public class R2ServersLifecycle implements SmartLifecycle {
 
   private Services addHandlers(
       ConnectionContext ctx,
-      Function<ConnectionContext, Collection<Object>> handlerFactory) {
+      RequesterFactory requesterFactory,
+      ServerApiHandlersFactory serverHandlers) {
     Services services = new Services();
-    Collection<Object> handlers = handlerFactory.apply(ctx);
+    Collection<Object> handlers = serverHandlers.apply(ctx, requesterFactory);
     handlers.forEach(services::add);
     return services;
   }
@@ -281,16 +281,17 @@ public class R2ServersLifecycle implements SmartLifecycle {
 
     private final ServerRSocketFactory serverRSocketFactory;
 
-    private Optional<List<ResponderApiProvider>> apiProviders = Optional.empty();
+    private Optional<List<ServerHandlersProvider<?>>> apiProviders = Optional.empty();
     private Optional<List<R2DataCodec>> dataCodecs = Optional.empty();
     private Optional<List<R2ServerTransport>> transports = Optional.empty();
+    private Optional<List<RequestersProvider>> requesterProviders = Optional.empty();
 
     public Builder(ServerRSocketFactory serverRSocketFactory) {
       this.serverRSocketFactory = serverRSocketFactory;
 
     }
 
-    public Builder apiProviders(Optional<List<ResponderApiProvider>> apiProviders) {
+    public Builder apiProviders(Optional<List<ServerHandlersProvider<?>>> apiProviders) {
       this.apiProviders = apiProviders;
       return this;
     }
@@ -305,8 +306,13 @@ public class R2ServersLifecycle implements SmartLifecycle {
       return this;
     }
 
+    public Builder requesterProviders(Optional<List<RequestersProvider>> requesterProviders) {
+      this.requesterProviders = requesterProviders;
+      return this;
+    }
+
     public R2ServersLifecycle build(DefaultProperties defProps,
-                                    List<ResponderEndpointProperties> props) {
+                                    List<ServerEndpointProperties> props) {
       ServerPropertiesResolver propertiesResolver =
           new ServerPropertiesResolver(
               serverFallbackProperties());
@@ -314,11 +320,12 @@ public class R2ServersLifecycle implements SmartLifecycle {
           serverRSocketFactory,
           orEmpty(apiProviders),
           orEmpty(dataCodecs),
-          orEmpty(transports));
+          orEmpty(transports),
+          orEmpty(requesterProviders));
 
       EndpointSupport endpointSupport = new EndpointSupport();
 
-      Resolved<Set<ResponderEndpointProperties>> resolvedProps =
+      Resolved<Set<ServerEndpointProperties>> resolvedProps =
           propertiesResolver
               .resolve(props, defProps);
       if (resolvedProps.isErr()) {
@@ -326,7 +333,7 @@ public class R2ServersLifecycle implements SmartLifecycle {
             "R2Server config is not complete: " + resolvedProps.err());
       }
 
-      Set<ResponderEndpointProperties> serverProps = resolvedProps.succ();
+      Set<ServerEndpointProperties> serverProps = resolvedProps.succ();
       Set<ServerConfig> serverConfigs = configResolver.resolve(serverProps);
 
       return new R2ServersLifecycle(

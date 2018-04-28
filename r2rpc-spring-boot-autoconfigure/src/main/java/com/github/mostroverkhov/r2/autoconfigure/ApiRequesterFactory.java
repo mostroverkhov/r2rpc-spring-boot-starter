@@ -1,19 +1,18 @@
-package com.github.mostroverkhov.r2.autoconfigure.client;
+package com.github.mostroverkhov.r2.autoconfigure;
 
-import com.github.mostroverkhov.r2.core.requester.RequesterFactory;
+import com.github.mostroverkhov.r2.core.RequesterFactory;
 
-import java.lang.reflect.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class ApiRequesterFactory {
   private final Set<Class<?>> apis;
   private final RequesterFactory requesterFactory;
 
   public ApiRequesterFactory(RequesterFactory requesterFactory,
-                             List<Class<?>> apis) {
+                             Collection<Class<?>> apis) {
     this.apis = new HashSet<>(apis);
     this.requesterFactory = requesterFactory;
   }

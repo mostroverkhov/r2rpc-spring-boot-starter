@@ -1,19 +1,22 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
-import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
+import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
+import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
+import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ResponderEndpointProperties;
-import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ServerEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.server.apihandlers.ServerApiHandlersFactory;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
+import com.github.mostroverkhov.r2.core.ConnectionContext;
 import com.github.mostroverkhov.r2.core.DataCodec;
-import com.github.mostroverkhov.r2.core.Metadata.Builder;
+import com.github.mostroverkhov.r2.core.Metadata;
+import com.github.mostroverkhov.r2.core.RequesterFactory;
 import com.github.mostroverkhov.r2.core.contract.RequestStream;
 import com.github.mostroverkhov.r2.core.contract.Service;
-import com.github.mostroverkhov.r2.core.responder.ConnectionContext;
 import io.rsocket.RSocketFactory;
-import io.rsocket.RSocketFactory.ServerRSocketFactory;
 import io.rsocket.transport.netty.server.TcpServerTransport;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
@@ -34,21 +38,23 @@ public class ServerConfigResolverTest {
 
   @Before
   public void setUp() {
-    ServerRSocketFactory serverRSocketFactory = RSocketFactory.receive();
-    List<ResponderApiProvider> apiProviders = asList(new BazResponderApiProvider());
+    RSocketFactory.ServerRSocketFactory serverRSocketFactory = RSocketFactory.receive();
+    List<ServerHandlersProvider<?>> handlerProviders = asList(new BazServerHandlersProvider());
     List<R2DataCodec> dataCodecs = asList(new R2DataCodecJacksonJson());
     List<R2ServerTransport> transport = asList(new R2ServerTransportTcp());
-
+    List<RequestersProvider> requestersProviders = asList(new BazRequestersProvider());
     resolver = new ServerConfigResolver(
         serverRSocketFactory,
-        apiProviders,
+        handlerProviders,
         dataCodecs,
-        transport);
+        transport,
+        requestersProviders);
   }
 
   @Test
   public void resolveAll() {
-    Set<ServerConfig> resolved = resolver.resolve(Collections.singleton(validProps()));
+    Set<ServerConfig> resolved = resolver
+        .resolve(Collections.singleton(validProps()));
 
     assertThat(resolved)
         .isNotNull()
@@ -68,56 +74,65 @@ public class ServerConfigResolverTest {
 
     assertThat(serverConfig.rSocketFactory()).isNotNull();
 
-    Function<ConnectionContext, Collection<Object>> handlers =
-        serverConfig.handlers();
+    ServerApiHandlersFactory handlers = serverConfig.handlers();
     assertThat(handlers).isNotNull();
+
+    ConnectionContext ctx = new ConnectionContext(
+        new Metadata.Builder().build());
+    MockRequesterFactory requesterFactory = new MockRequesterFactory();
     Collection<Object> actualHandlers = handlers
-        .apply(new ConnectionContext(new Builder().build()));
+        .apply(ctx, requesterFactory);
     assertThat(actualHandlers).isNotNull().hasSize(1);
   }
 
   @Test
   public void resolveNoAPi() {
 
-    ResponderEndpointProperties props = validProps();
-    props.setApi(Collections.emptyList());
+    ServerEndpointProperties props = validProps();
+    props.setResponders(Collections.emptyList());
     Set<ServerConfig> resolved = resolver.resolve(Collections.singleton(props));
 
     assertThat(resolved)
         .isNotNull()
         .hasSize(1);
 
-    Function<ConnectionContext, Collection<Object>> handlers = resolved
+    ServerApiHandlersFactory handlers = resolved
         .iterator()
         .next()
         .handlers();
     assertThat(handlers).isNotNull();
+
+    ConnectionContext ctx = new ConnectionContext(
+        new Metadata.Builder().build());
+    MockRequesterFactory requesterFactory = new MockRequesterFactory();
+
     Collection<Object> actualHandlers = handlers
-        .apply(new ConnectionContext(new Builder().build()));
+        .apply(ctx, requesterFactory);
     assertThat(actualHandlers).isNotNull().hasSize(0);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void resolveMissingTransport() {
-    ResponderEndpointProperties props = validProps();
+    ServerEndpointProperties props = validProps();
     props.setTransport("absent");
     resolver.resolve(Collections.singleton(props));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void resolveMissingCodec() {
-    ResponderEndpointProperties props = validProps();
+    ServerEndpointProperties props = validProps();
     props.setCodecs(Collections.singletonList("absent"));
     resolver.resolve(Collections.singleton(props));
   }
 
-  private static ResponderEndpointProperties validProps() {
-    ResponderEndpointProperties props = new ResponderEndpointProperties();
+  private static ServerEndpointProperties validProps() {
+    ServerEndpointProperties props = new ServerEndpointProperties();
     props.setName("test");
     props.setPort(8081);
-    props.setApi(asList("baz"));
+    props.setResponders(asList("baz"));
     props.setTransport("tcp");
     props.setCodecs(Collections.singletonList("json"));
+    props.setRequesters(Collections.emptyList());
     return props;
   }
 
@@ -177,11 +192,21 @@ public class ServerConfigResolverTest {
     }
   }
 
-  static class BazResponderApiProvider implements ResponderApiProvider<BazApiImpl> {
+  static class BazServerHandlersProvider implements ServerHandlersProvider<BazApiImpl> {
 
     @Override
-    public BazApiImpl apply(ConnectionContext connectionContext) {
-      return new BazApiImpl(connectionContext);
+    public BazApiImpl apply(ConnectionContext ctx, ApiRequesterFactory requesterFactory) {
+      return new BazApiImpl(ctx);
+    }
+  }
+
+  static class BazRequestersProvider extends RequestersProvider<BazRequestersProvider> {
+  }
+
+  static class MockRequesterFactory implements RequesterFactory {
+    @Override
+    public <T> T create(Class<T> clazz) {
+      throw new UnsupportedOperationException("Mock!");
     }
   }
 }

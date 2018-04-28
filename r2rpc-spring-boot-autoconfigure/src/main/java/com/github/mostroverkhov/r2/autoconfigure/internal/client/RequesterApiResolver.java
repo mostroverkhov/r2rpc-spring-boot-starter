@@ -1,11 +1,10 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.client;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2Api;
-import com.github.mostroverkhov.r2.autoconfigure.client.RequesterApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.CachingResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -22,13 +21,13 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
-public class ApiResolver extends CachingResolver<String, Class<?>> {
-  private static final Logger logger = LoggerFactory.getLogger(ApiResolver.class);
+public class RequesterApiResolver extends CachingResolver<String, Class<?>> {
+  private static final Logger logger = LoggerFactory.getLogger(RequesterApiResolver.class);
 
-  private final List<RequesterApiProvider> providers;
+  private final List<RequestersProvider> providers;
 
-  public ApiResolver(List<RequesterApiProvider> providers) {
-    super(ApiResolver::error);
+  public RequesterApiResolver(List<RequestersProvider> providers) {
+    super(RequesterApiResolver::error);
     this.providers = providers;
   }
 
@@ -49,9 +48,9 @@ public class ApiResolver extends CachingResolver<String, Class<?>> {
         resolveApis(apiProvider, cache));
   }
 
-  void resolveApis(RequesterApiProvider<?> requesterApiProvider,
+  void resolveApis(RequestersProvider<?> requestersProvider,
                    Map<String, Class<?>> cache) {
-    String apiPackage = findApiPackage(requesterApiProvider);
+    String apiPackage = findApiPackage(requestersProvider);
     try {
       cacheApis(apiPackage, cache);
     } catch (IOException e) {
@@ -60,8 +59,8 @@ public class ApiResolver extends CachingResolver<String, Class<?>> {
     }
   }
 
-  private String findApiPackage(RequesterApiProvider<?> requesterApiProvider) {
-    Type superClass = requesterApiProvider.getClass().getGenericSuperclass();
+  private String findApiPackage(RequestersProvider<?> requestersProvider) {
+    Type superClass = requestersProvider.getClass().getGenericSuperclass();
     if (superClass instanceof ParameterizedType) {
       Type[] typeArgs = ((ParameterizedType) superClass).getActualTypeArguments();
       if (typeArgs.length == 1) {
@@ -71,7 +70,7 @@ public class ApiResolver extends CachingResolver<String, Class<?>> {
         }
       }
     }
-    throw new IllegalArgumentException("Impl must directly inherit from RequesterApiProvider, " +
+    throw new IllegalArgumentException("Impl must directly inherit from RequestersProvider, " +
         "and have non-parameterized type parameter");
   }
 

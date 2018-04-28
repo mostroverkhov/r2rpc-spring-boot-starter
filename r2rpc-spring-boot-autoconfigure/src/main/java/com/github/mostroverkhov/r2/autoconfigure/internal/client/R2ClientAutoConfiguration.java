@@ -2,11 +2,14 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
+import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
+import com.github.mostroverkhov.r2.autoconfigure.client.ClientHandlersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
-import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransportTcp;
-import com.github.mostroverkhov.r2.autoconfigure.client.RequesterApiProvider;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.*;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ClientEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ClientProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.DefaultProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.R2RpcProperties;
 import io.rsocket.RSocketFactory;
 import io.rsocket.transport.netty.NettyDuplexConnection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,29 +56,30 @@ public class R2ClientAutoConfiguration {
   @Bean
   public ClientConnectors r2Client(
       ClientRSocketFactory clientRSocketFactory,
-      Optional<List<RequesterApiProvider>> apiProviders,
+      Optional<List<RequestersProvider>> apiProviders,
+      Optional<List<ClientHandlersProvider<?>>> handlers,
       Optional<List<R2DataCodec>> dataCodecs,
       Optional<List<R2ClientTransport>> transports) {
 
-    Optional<RequesterProperties>
-        clientRequester =
+    Optional<ClientProperties>
+        clientProperties =
         Optional.of(
             rootProperties)
-            .map(R2RpcProperties::getClient)
-            .map(PeerProperties::getRequester);
+            .map(R2RpcProperties::getClient);
 
-    DefaultProperties defaultProperties = clientRequester
-        .map(RequesterProperties::getDefaults)
+    DefaultProperties defaultClientProperties = clientProperties
+        .map(ClientProperties::getDefaults)
         .orElse(null);
 
-    List<RequesterEndpointProperties> endpoints = clientRequester
-        .map(RequesterProperties::getEndpoints)
+    List<ClientEndpointProperties> clientEndpoints = clientProperties
+        .map(ClientProperties::getEndpoints)
         .orElse(null);
 
     return new R2ConnectorsBuilder(clientRSocketFactory)
         .apiProviders(apiProviders)
+        .handlerProviders(handlers)
         .dataCodecs(dataCodecs)
         .transports(transports)
-        .build(defaultProperties, endpoints);
+        .build(defaultClientProperties, clientEndpoints);
   }
 }

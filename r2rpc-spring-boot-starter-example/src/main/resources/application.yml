@@ -1,25 +1,29 @@
 
 r2rpc:
  server:
-  responder:
     defaults:
-      codecs: [json]
       transport: tcp
+      codecs:
+        - json
     endpoints:
       - name: foo
         port: 8083
-        api:
+        responders:
           - bar
           - baz
-
+        requesters:
+          - baz
  client:
-  requester:
     endpoints:
       - name: foo
-        api:
+        transport: tcp
+        codecs:
+          - json
+        requesters:
           - bar
           - baz
-
+        responders:
+          - baz
 logging:
   level:
     com.github.mostroverkhov.r2: DEBUG

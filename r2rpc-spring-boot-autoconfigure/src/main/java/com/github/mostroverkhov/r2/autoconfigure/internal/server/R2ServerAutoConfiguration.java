@@ -2,9 +2,10 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
+import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;
 import com.github.mostroverkhov.r2.autoconfigure.internal.properties.*;
-import com.github.mostroverkhov.r2.autoconfigure.server.ResponderApiProvider;
+import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
 import io.rsocket.RSocketFactory;
@@ -53,22 +54,22 @@ public class R2ServerAutoConfiguration {
 
   @Bean
   public R2ServersLifecycle serversLifecycle(
-      Optional<List<ResponderApiProvider>> apiProviders,
+      Optional<List<ServerHandlersProvider<?>>> apiProviders,
       Optional<List<R2DataCodec>> dataCodecs,
       Optional<List<R2ServerTransport>> transports,
+      Optional<List<RequestersProvider>> requesterApiProviders,
       ServerRSocketFactory serverRSocketFactory) {
 
-    Optional<ResponderProperties> serverResponder =
+    Optional<ServerProperties> serverResponder =
         Optional.of(r2RpcProperties)
-            .map(R2RpcProperties::getServer)
-            .map(PeerProperties::getResponder);
+            .map(R2RpcProperties::getServer);
 
     DefaultProperties defaultProperties = serverResponder
-        .map(ResponderProperties::getDefaults)
+        .map(ServerProperties::getDefaults)
         .orElse(null);
 
-    List<ResponderEndpointProperties> endpoints = serverResponder
-        .map(ResponderProperties::getEndpoints)
+    List<ServerEndpointProperties> endpoints = serverResponder
+        .map(ServerProperties::getEndpoints)
         .orElse(null);
 
     return new R2ServersLifecycle
@@ -76,6 +77,7 @@ public class R2ServerAutoConfiguration {
         .apiProviders(apiProviders)
         .dataCodecs(dataCodecs)
         .transports(transports)
+        .requesterProviders(requesterApiProviders)
         .build(defaultProperties, endpoints);
   }
 

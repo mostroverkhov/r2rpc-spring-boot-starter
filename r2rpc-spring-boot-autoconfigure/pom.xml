@@ -27,7 +27,7 @@
     </dependency>
     <dependency>
       <groupId>com.github.mostroverkhov.r2</groupId>
-      <artifactId>java</artifactId>
+      <artifactId>reactor-java</artifactId>
     </dependency>
     <dependency>
       <groupId>com.github.mostroverkhov.r2</groupId>

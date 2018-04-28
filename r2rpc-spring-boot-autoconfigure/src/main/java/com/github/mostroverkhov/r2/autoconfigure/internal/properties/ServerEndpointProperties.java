@@ -1,6 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.properties;
 
-public class ResponderEndpointProperties extends EndpointProperties {
+public class ServerEndpointProperties extends EndpointProperties {
 
   private int port;
 
@@ -14,13 +14,14 @@ public class ResponderEndpointProperties extends EndpointProperties {
 
   @Override
   public String toString() {
-    return "ResponderEndpointProperties{" +
-        "name='" + name + '\'' +
+    return "ServerEndpointProperties{" +
+        "port=" + port +
+        ", name='" + name + '\'' +
         ", transport='" + transport + '\'' +
-        ", port=" + port +
         ", codecs=" + codecs +
-        ", api='" + api + '\'' +
+        ", requesters=" + requesters +
+        ", responders=" + responders +
         ", enabled=" + enabled +
-        '}';
+        "} " + super.toString();
   }
 }

@@ -1,13 +1,13 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
 import com.github.mostroverkhov.r2.autoconfigure.internal.client.ClientPropertiesResolver;
-import com.github.mostroverkhov.r2.autoconfigure.internal.properties.RequesterEndpointProperties;
+import com.github.mostroverkhov.r2.autoconfigure.internal.properties.ClientEndpointProperties;
 import org.junit.Before;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ClientPropertiesResolverTest extends PropertiesResolverTest<RequesterEndpointProperties>{
+public class ClientPropertiesResolverTest extends PropertiesResolverTest<ClientEndpointProperties>{
 
   @Override
   @Before
@@ -17,10 +17,10 @@ public class ClientPropertiesResolverTest extends PropertiesResolverTest<Request
   }
 
   @Override
-  public RequesterEndpointProperties copy(RequesterEndpointProperties props) {
-    RequesterEndpointProperties copy = new RequesterEndpointProperties();
+  public ClientEndpointProperties copy(ClientEndpointProperties props) {
+    ClientEndpointProperties copy = new ClientEndpointProperties();
     copy.setTransport(props.getTransport());
-    copy.setApi(props.getApi());
+    copy.setResponders(props.getResponders());
     copy.setCodecs(props.getCodecs());
     copy.setName(props.getName());
     copy.setEnabled(props.isEnabled());
@@ -28,8 +28,8 @@ public class ClientPropertiesResolverTest extends PropertiesResolverTest<Request
   }
 
   @Override
-  public RequesterEndpointProperties createProps() {
-    RequesterEndpointProperties mock = new RequesterEndpointProperties();
+  public ClientEndpointProperties createProps() {
+    ClientEndpointProperties mock = new ClientEndpointProperties();
 
     String api = MockProps.api;
     String codec = MockProps.codec;
@@ -38,7 +38,7 @@ public class ClientPropertiesResolverTest extends PropertiesResolverTest<Request
 
     mock.setName(name);
     mock.setCodecs(Collections.singletonList(codec));
-    mock.setApi(Arrays.asList(api));
+    mock.setResponders(Arrays.asList(api));
     mock.setTransport(transport);
 
     return mock;
