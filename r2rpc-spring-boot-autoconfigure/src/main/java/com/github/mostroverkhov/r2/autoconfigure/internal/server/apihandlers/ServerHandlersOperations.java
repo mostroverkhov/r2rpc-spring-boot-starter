@@ -1,6 +1,7 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.server.apihandlers;
 
 import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
+import com.github.mostroverkhov.r2.autoconfigure.internal.ApiRequesterFactoryProxy;
 import com.github.mostroverkhov.r2.autoconfigure.internal.HandlersOperations;
 import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
 import com.github.mostroverkhov.r2.core.ConnectionContext;

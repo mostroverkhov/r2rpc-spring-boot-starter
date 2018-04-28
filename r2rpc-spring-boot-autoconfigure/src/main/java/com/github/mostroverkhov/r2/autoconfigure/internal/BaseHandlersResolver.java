@@ -94,7 +94,7 @@ public abstract class BaseHandlersResolver<
   private static Function<RequesterFactory, ApiRequesterFactory> converter(
       Collection<Class<?>> apiRequesters) {
     return requesterFactory ->
-        new ApiRequesterFactory(requesterFactory, apiRequesters);
+        new ApiRequesterFactoryProxy(requesterFactory, apiRequesters);
   }
 
   private Collection<HandlersInfo> resolveApiHandlers(Set<String> apiNames) {

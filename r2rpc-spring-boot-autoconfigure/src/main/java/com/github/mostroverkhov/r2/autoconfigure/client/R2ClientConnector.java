@@ -1,10 +1,9 @@
 package com.github.mostroverkhov.r2.autoconfigure.client;
 
 import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
+import com.github.mostroverkhov.r2.autoconfigure.internal.ApiRequesterFactoryProxy;
 import com.github.mostroverkhov.r2.autoconfigure.internal.client.ClientConfig;
 import com.github.mostroverkhov.r2.autoconfigure.internal.client.apihandlers.ClientApiHandlersFactory;
-import com.github.mostroverkhov.r2.autoconfigure.internal.server.apihandlers.ServerApiHandlersFactory;
-import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
 import com.github.mostroverkhov.r2.core.*;
 import com.github.mostroverkhov.r2.java.ClientAcceptorBuilder;
 import com.github.mostroverkhov.r2.java.R2Client;
@@ -60,7 +59,7 @@ public class R2ClientConnector {
                 .transport(transportFactory.apply(address, port))
                 .metadata(metadata)
                 .start()
-                .map(rf -> new ApiRequesterFactory(rf, apis)));
+                .map(rf -> new ApiRequesterFactoryProxy(rf, apis)));
   }
 
   private Services addHandlers(
