@@ -1,6 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
-import com.github.mostroverkhov.r2.autoconfigure.R2Api;
+import com.github.mostroverkhov.r2.contract.R2Api;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;

@@ -1,6 +1,6 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.client;
 
-import com.github.mostroverkhov.r2.autoconfigure.R2Api;
+import com.github.mostroverkhov.r2.contract.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.internal.CachingResolver;
 import org.slf4j.Logger;

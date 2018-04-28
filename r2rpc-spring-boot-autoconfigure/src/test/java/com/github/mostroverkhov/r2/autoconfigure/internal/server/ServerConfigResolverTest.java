@@ -1,6 +1,5 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal.server;
 
-import com.github.mostroverkhov.r2.autoconfigure.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
@@ -10,6 +9,7 @@ import com.github.mostroverkhov.r2.autoconfigure.internal.server.apihandlers.Ser
 import com.github.mostroverkhov.r2.autoconfigure.server.R2ServerTransport;
 import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
 import com.github.mostroverkhov.r2.codec.jackson.JacksonJsonDataCodec;
+import com.github.mostroverkhov.r2.contract.R2Api;
 import com.github.mostroverkhov.r2.core.ConnectionContext;
 import com.github.mostroverkhov.r2.core.DataCodec;
 import com.github.mostroverkhov.r2.core.Metadata;
@@ -26,8 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
