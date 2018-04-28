@@ -55,7 +55,7 @@ For each endpoint auto-configuration creates `R2ClientConnector`, which connects
 ### Interactions
  RSocket protocol itself supports symmetric interactions - each side of connection (Client and Server) have `Requester` for initiating requests (Request-response, Request-channel etc.), and `Responder` to accept requests from peer.  Sample configuration:
 
- ###### Requester
+ ##### Requester
 Each `Requester` of endpoint references `R2 API` - collection of [R2RPC](https://github.com/mostroverkhov/r2) service definitions, annotated with `R2Api(name)`. R2 APIs  allow to group related `R2` service definitions in one namespace so they can be shared more conveniently.
 
 Requesters are created with `ApiRequesterFactory.create(R2Api.class)`
@@ -83,7 +83,7 @@ public interface BazContract {
   Flux<Baz> baz(Baz baz);
 }
 ```
-######Responder
+##### Responder
 Each `Responder` is an  implementation of `R2API`, and acts as Handler for incoming requests from peer. Responders should be wrapped into peer-specific factory (`[Peer]HandlersProvider`), and registered in Spring.
 
 For server, it's `ServerHandlersProvider<ApiImpl>`, where `ApiImpl` is `R2API` implementation.
@@ -127,7 +127,7 @@ public class BazClientHandlersProvider implements ClientHandlersProvider<BazApiI
   }
 }
 ```
-######R2 API rules
+##### R2 API rules
 R2 API definitions are constrained by following rules
 * All definitions must have unique names. If several implementations of same API are necessary, 
 override name on implementation itself by annotating It with `@R2API(newName)`
@@ -135,7 +135,7 @@ override name on implementation itself by annotating It with `@R2API(newName)`
 * API implementations per endpoint must contribute API definitions of unique type 
   (in other words, no more than one implementation of particular API per endpoint)
 
-###Configuration
+### Configuration
 
 ##### Defaults
 `r2rpc.server.defaults` can contain `Transport` and `Codecs` common for all endpoints.
