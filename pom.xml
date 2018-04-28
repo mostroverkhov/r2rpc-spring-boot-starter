@@ -25,6 +25,7 @@
     <module>r2rpc-spring-boot-autoconfigure</module>
     <module>r2rpc-spring-boot-starter</module>
     <module>r2rpc-spring-boot-starter-example</module>
+    <module>r2rpc-spring-boot-contract</module>
   </modules>
 
   <dependencyManagement>
@@ -39,6 +40,11 @@
       <dependency>
         <groupId>com.github.mostroverkhov.r2</groupId>
         <artifactId>reactor-java</artifactId>
+        <version>${r2rpc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.mostroverkhov.r2</groupId>
+        <artifactId>contract</artifactId>
         <version>${r2rpc.version}</version>
       </dependency>
       <dependency>

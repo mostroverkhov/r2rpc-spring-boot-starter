@@ -1,8 +1,8 @@
 package com.github.mostroverkhov.r2.autoconfigure.internal;
 
-import com.github.mostroverkhov.r2.autoconfigure.R2Api;
 import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
 import com.github.mostroverkhov.r2.autoconfigure.server.ServerHandlersProvider;
+import com.github.mostroverkhov.r2.contract.R2Api;
 import com.github.mostroverkhov.r2.core.ConnectionContext;
 import com.github.mostroverkhov.r2.core.contract.RequestStream;
 import com.github.mostroverkhov.r2.core.contract.Service;
