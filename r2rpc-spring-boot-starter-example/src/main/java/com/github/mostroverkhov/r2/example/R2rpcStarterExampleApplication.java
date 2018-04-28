@@ -7,7 +7,7 @@ import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls
 import com.github.mostroverkhov.r2.example.api.*;
 import com.github.mostroverkhov.r2.example.client.BarBazRequestersProvider;
 import com.github.mostroverkhov.r2.example.client.BazClientHandlersProvider;
-import com.github.mostroverkhov.r2.example.server.BarServerServer;
+import com.github.mostroverkhov.r2.example.server.BarServerHandlersProvider;
 import com.github.mostroverkhov.r2.example.server.BazServerHandlersProvider;
 import com.github.mostroverkhov.r2.example.svc.Bar;
 import com.github.mostroverkhov.r2.example.svc.Baz;
@@ -48,8 +48,8 @@ public class R2rpcStarterExampleApplication {
   }
   /*bar API handlers*/
   @Bean
-  public BarServerServer barApi() {
-    return new BarServerServer();
+  public BarServerHandlersProvider barApi() {
+    return new BarServerHandlersProvider();
   }
   /*hint used by R2RPC autoconfiguration to find APIs. In this case,
   * BarBazApiToken location determines APIs package*/
