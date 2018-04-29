@@ -1,7 +1,7 @@
 package com.github.mostroverkhov.r2.example;
 
 import com.github.mostroverkhov.r2.autoconfigure.ApiRequesterFactory;
-import com.github.mostroverkhov.r2.autoconfigure.internal.client.ClientConnectors;
+import com.github.mostroverkhov.r2.autoconfigure.client.ClientConnectors;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.Endpoint;
 import com.github.mostroverkhov.r2.autoconfigure.server.endpoints.ServerControls;
 import com.github.mostroverkhov.r2.example.api.*;

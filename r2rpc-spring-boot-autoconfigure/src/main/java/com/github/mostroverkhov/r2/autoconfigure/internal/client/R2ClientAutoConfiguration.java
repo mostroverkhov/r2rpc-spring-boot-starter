@@ -3,6 +3,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
+import com.github.mostroverkhov.r2.autoconfigure.client.ClientConnectors;
 import com.github.mostroverkhov.r2.autoconfigure.client.ClientHandlersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
 import com.github.mostroverkhov.r2.autoconfigure.internal.R2DataCodecJacksonJson;

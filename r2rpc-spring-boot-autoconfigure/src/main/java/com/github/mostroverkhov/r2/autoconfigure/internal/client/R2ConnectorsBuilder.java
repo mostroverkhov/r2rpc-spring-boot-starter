@@ -2,6 +2,7 @@ package com.github.mostroverkhov.r2.autoconfigure.internal.client;
 
 import com.github.mostroverkhov.r2.autoconfigure.R2DataCodec;
 import com.github.mostroverkhov.r2.autoconfigure.RequestersProvider;
+import com.github.mostroverkhov.r2.autoconfigure.client.ClientConnectors;
 import com.github.mostroverkhov.r2.autoconfigure.client.ClientHandlersProvider;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientConnector;
 import com.github.mostroverkhov.r2.autoconfigure.client.R2ClientTransport;
@@ -75,7 +76,7 @@ class R2ConnectorsBuilder {
                 ClientConfig::name,
                 this::connectorSupplier));
 
-    return new ClientConnectors(endpoints);
+    return new InternalClientConnectors(endpoints);
   }
 
   private static <T> List<T> orEmpty(Optional<List<T>> list) {
